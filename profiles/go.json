@@ -1,0 +1,63 @@
+{
+  "display_name": "Go",
+  "description": "Développement Go (APIs, CLI, microservices)",
+  "detect_markers": ["go.mod"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des packages Go"
+    }
+  },
+
+  "variants": {
+    "gin": {
+      "claude_md_append": "\n## Framework: Gin\n- Router performant\n- Middleware chain\n- Binding/validation automatique\n- Dev: `go run . ` ou `air` pour le hot reload"
+    },
+    "echo": {
+      "claude_md_append": "\n## Framework: Echo\n- Routing de haute performance\n- Middleware extensible\n- Binding et validation\n- Dev: `go run .` ou `air`"
+    },
+    "cli": {
+      "claude_md_append": "\n## Application CLI\n- Parser: cobra\n- Config: viper\n- Output formaté: tablewriter, lipgloss, bubbletea"
+    }
+  },
+
+  "claude_md": "# Projet Go\n\n## Stack\n- Language: Go 1.22+\n- Modules: go mod\n\n## Commandes\n- Build: `go build ./...`\n- Test: `go test ./...`\n- Run: `go run .`\n- Lint: `golangci-lint run`\n- Format: `gofmt -w .` ou `goimports -w .`\n- Vet: `go vet ./...`\n- Tidy: `go mod tidy`\n\n## Conventions\n- Effective Go + Go Code Review Comments\n- Interfaces petites (1-3 méthodes)\n- Accept interfaces, return structs\n- Error wrapping avec fmt.Errorf(\"...: %w\", err)\n- Table-driven tests",
+
+  "rules": {
+    "go-conventions": "---\npaths:\n  - \"**/*.go\"\n---\n# Conventions Go\n- PascalCase pour les exports, camelCase pour le privé\n- Interfaces petites et focalisées\n- Pas de getters/setters inutiles\n- Errors are values: toujours vérifier les erreurs\n- Error wrapping: fmt.Errorf(\"doing X: %w\", err)\n- Context en premier paramètre\n- Struct embedding pour la composition\n- Channels pour la communication, mutexes pour l'état\n- Commentaires sur tous les types/fonctions exportés",
+    "testing": "---\npaths:\n  - \"**/*_test.go\"\n---\n# Conventions de Tests Go\n- Table-driven tests systématiquement\n- Subtests avec t.Run()\n- testify pour les assertions (assert/require)\n- httptest pour les handlers HTTP\n- t.Parallel() quand possible\n- Testdata dans testdata/\n- Mocks avec interfaces (pas de framework nécessaire)"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Build, vet, lint et test le projet Go\n---\n\n1. Format : `gofmt -l .`\n2. Vet : `go vet ./...`\n3. Lint : `golangci-lint run` (si disponible)\n4. Tests : `go test -v -race ./...`\n5. Build : `go build ./...`"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(go *)",
+        "Bash(golangci-lint *)",
+        "Bash(air *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

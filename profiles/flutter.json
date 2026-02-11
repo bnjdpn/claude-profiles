@@ -1,0 +1,77 @@
+{
+  "display_name": "Flutter / Dart",
+  "description": "Développement cross-platform avec Flutter et Dart",
+  "detect_markers": ["pubspec.yaml"],
+
+  "mcp_servers": {
+    "flutter": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-flutter"],
+      "_comment": "Documentation Flutter/Dart temps réel + pub.dev packages"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "figma-flutter": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "figma-flutter-mcp@latest"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
+      },
+      "_comment": "Figma → Flutter widget conversion directe"
+    }
+  },
+
+  "variants": {
+    "riverpod": {
+      "claude_md_append": "\n## State Management: Riverpod\n- @riverpod annotation pour les providers\n- ConsumerWidget / ConsumerStatefulWidget\n- ref.watch() pour écouter, ref.read() pour les actions\n- AsyncValue pour les états async"
+    },
+    "bloc": {
+      "claude_md_append": "\n## State Management: BLoC\n- Cubit pour la logique simple, Bloc pour les événements complexes\n- BlocProvider / BlocBuilder / BlocListener\n- États immutables avec Equatable\n- Repository pattern pour l'accès aux données"
+    },
+    "getx": {
+      "claude_md_append": "\n## State Management: GetX\n- GetxController pour la logique\n- Obx(() => ...) pour le reactive\n- Get.to() / Get.toNamed() pour la navigation"
+    }
+  },
+
+  "claude_md": "# Projet Flutter / Dart\n\n## Stack\n- Framework: Flutter 3+\n- Language: Dart 3+\n\n## Commandes\n- Run: `flutter run`\n- Build: `flutter build apk` / `flutter build ios`\n- Tests: `flutter test`\n- Analyze: `flutter analyze`\n- Format: `dart format .`\n- Packages: `flutter pub get`\n- Code gen: `dart run build_runner build`\n\n## Architecture\n- Feature-first organization\n- Repository pattern pour l'accès aux données\n- Séparation UI / Business Logic / Data\n\n## Conventions\n- Dart style guide officiel\n- Widgets petits et composables (< 100 lignes)\n- Const constructors partout où possible\n- Freezed/json_serializable pour les modèles",
+
+  "rules": {
+    "dart-conventions": "---\npaths:\n  - \"**/*.dart\"\n---\n# Conventions Dart/Flutter\n- camelCase pour variables/fonctions, PascalCase pour classes\n- Const constructors systématiquement\n- Préférer final à var\n- Null safety strict (pas de !)\n- Extensions pour les utilitaires sur les types existants\n- Widgets < 100 lignes, extraire en sous-widgets si plus gros\n- Fichiers nommés en snake_case",
+    "testing": "---\npaths:\n  - \"test/**/*.dart\"\n---\n# Conventions de Tests Flutter\n- flutter_test pour les widget tests\n- mockito ou mocktail pour les mocks\n- golden tests pour les vérifications visuelles\n- group/test avec des descriptions lisibles\n- pump() + pumpAndSettle() pour les animations"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Analyze, test et build le projet Flutter\n---\n\n1. Analyze : `flutter analyze`\n2. Format check : `dart format --set-exit-if-changed .`\n3. Tests : `flutter test`\n4. Build : `flutter build apk --debug` ou `flutter build ios --debug`",
+    "create-feature": "---\nname: create-feature\ndescription: Créer une nouvelle feature Flutter\n---\n\nCréer la feature `$ARGUMENTS` :\n\n1. Créer `lib/features/$ARGUMENTS/presentation/pages/$ARGUMENTS_page.dart`\n2. Créer `lib/features/$ARGUMENTS/presentation/widgets/`\n3. Créer `lib/features/$ARGUMENTS/domain/models/`\n4. Créer `lib/features/$ARGUMENTS/domain/repositories/`\n5. Créer `lib/features/$ARGUMENTS/data/`\n6. Créer `test/features/$ARGUMENTS/` avec les tests"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(flutter *)",
+        "Bash(dart *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

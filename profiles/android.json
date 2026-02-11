@@ -1,0 +1,74 @@
+{
+  "display_name": "Android / Kotlin",
+  "description": "Développement Android natif avec Kotlin et Jetpack Compose",
+  "detect_markers": ["build.gradle.kts", "app/build.gradle.kts", "settings.gradle.kts"],
+
+  "mcp_servers": {
+    "jetbrains": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@jetbrains/mcp-proxy"],
+      "_comment": "Intégration Android Studio / IntelliJ"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel Jetpack, Compose, etc."
+    },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-figma"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
+      }
+    }
+  },
+
+  "variants": {
+    "compose": {
+      "claude_md_append": "\n## UI: Jetpack Compose\n- Composables fonctionnels\n- State hoisting : état remonté au parent\n- Material 3 components\n- Navigation Compose\n- Preview annotations systématiques"
+    },
+    "xml-views": {
+      "claude_md_append": "\n## UI: XML Views\n- ConstraintLayout par défaut\n- ViewBinding (pas de findViewById)\n- Fragments avec Navigation Component\n- RecyclerView + ListAdapter + DiffUtil"
+    }
+  },
+
+  "claude_md": "# Projet Android / Kotlin\n\n## Stack\n- Language: Kotlin 1.9+\n- Min SDK: 26 (Android 8+)\n- Build: Gradle (Kotlin DSL)\n- UI: Jetpack Compose\n\n## Commandes\n- Build: `./gradlew assembleDebug`\n- Tests unitaires: `./gradlew test`\n- Tests instrumentés: `./gradlew connectedAndroidTest`\n- Lint: `./gradlew lint`\n- Clean: `./gradlew clean`\n\n## Architecture\n- MVVM + Clean Architecture\n- Hilt pour la DI\n- Coroutines + Flow pour l'async\n- Room pour la persistence locale\n- Retrofit pour le réseau",
+
+  "rules": {
+    "kotlin-conventions": "---\npaths:\n  - \"**/*.kt\"\n  - \"**/*.kts\"\n---\n# Conventions Kotlin/Android\n- Kotlin coding conventions officielles\n- data class pour les modèles\n- sealed class/interface pour les états et événements\n- Coroutines : viewModelScope pour les ViewModels\n- Hilt : @Inject constructor, pas de field injection\n- Compose : Composables stateless, état remonté\n- Nommage des Composables en PascalCase (comme des classes)",
+    "testing": "---\npaths:\n  - \"**/test/**/*.kt\"\n  - \"**/androidTest/**/*.kt\"\n---\n# Conventions de Tests Android\n- JUnit 5 + MockK pour les tests unitaires\n- Turbine pour tester les Flows\n- Compose Test pour les UI tests\n- Hilt Testing pour l'injection dans les tests\n- Robolectric pour les tests sans device"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Build et test le projet Android\n---\n\n1. Lint : `./gradlew lint`\n2. Tests unitaires : `./gradlew test`\n3. Build debug : `./gradlew assembleDebug`\n4. Vérifier le rapport de lint : app/build/reports/lint-results.html"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(./gradlew *)",
+        "Bash(gradle *)",
+        "Bash(adb *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

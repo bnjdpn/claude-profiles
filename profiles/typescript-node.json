@@ -1,0 +1,88 @@
+{
+  "display_name": "TypeScript / Node.js",
+  "description": "Développement backend TypeScript avec Node.js (APIs, microservices)",
+  "detect_markers": ["tsconfig.json", "package.json"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL:-postgres://localhost/dev}"
+      },
+      "_comment": "Si le projet utilise PostgreSQL"
+    }
+  },
+
+  "variants": {
+    "nestjs": {
+      "claude_md_append": "\n## Framework: NestJS\n- Dev: `npm run start:dev`\n- Modules/Controllers/Services pattern\n- Decorators pour le routing et la DI\n- Pipes pour la validation\n- Guards pour l'auth"
+    },
+    "express": {
+      "claude_md_append": "\n## Framework: Express + TypeScript\n- Dev: `npm run dev` (tsx ou ts-node)\n- Typage des Request/Response\n- Middleware typés"
+    },
+    "fastify": {
+      "claude_md_append": "\n## Framework: Fastify\n- Dev: `npm run dev`\n- Schema-based validation (JSON Schema)\n- Plugin system\n- Très performant"
+    }
+  },
+
+  "claude_md": "# Projet TypeScript / Node.js\n\n## Stack\n- Language: TypeScript 5+\n- Runtime: Node.js 20 LTS\n- Package manager: npm / pnpm\n\n## Commandes\n- Install: `npm install`\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Test: `npm test`\n- Lint: `npm run lint -- --fix`\n- Type check: `npx tsc --noEmit`\n\n## Conventions\n- Strict mode TypeScript\n- Zod pour la validation runtime\n- Prisma ou TypeORM pour l'ORM\n- Couverture cible 80%+",
+
+  "rules": {
+    "typescript": "---\npaths:\n  - \"**/*.ts\"\n---\n# Conventions TypeScript Backend\n- strict mode dans tsconfig.json\n- Interfaces pour les contrats, types pour les unions\n- Zod schemas pour la validation des inputs\n- Pas de any, utiliser unknown si nécessaire\n- Error handling explicite avec des types d'erreur custom\n- Barrel exports (index.ts) par module",
+    "testing": "---\npaths:\n  - \"**/*.test.ts\"\n  - \"**/*.spec.ts\"\n---\n# Conventions de Tests\n- Vitest ou Jest\n- Supertest pour les tests d'API HTTP\n- describe/it avec des noms lisibles\n- Fixtures partagées dans __fixtures__/\n- Mock les services externes, pas la DB (utiliser une DB de test)"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Type check, lint, test et build le projet TS/Node\n---\n\n1. Type check : `npx tsc --noEmit`\n2. Lint : `npm run lint`\n3. Tests : `npm test`\n4. Build : `npm run build`"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(npm *)",
+        "Bash(npx *)",
+        "Bash(pnpm *)",
+        "Bash(node *)",
+        "Bash(jest *)",
+        "Bash(vitest *)",
+        "Bash(prisma *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "npx prettier --write $(jq -r '.tool_input.file_path')"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

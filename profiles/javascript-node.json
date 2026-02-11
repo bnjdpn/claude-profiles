@@ -1,0 +1,77 @@
+{
+  "display_name": "JavaScript / Node.js",
+  "description": "Développement backend ou fullstack JavaScript avec Node.js",
+  "detect_markers": ["package.json"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des packages npm"
+    }
+  },
+
+  "variants": {
+    "express": {
+      "claude_md_append": "\n## Framework: Express\n- Dev: `npm run dev` (nodemon)\n- Middleware pattern\n- Router par domaine dans routes/\n- Error handling middleware en dernier"
+    },
+    "api": {
+      "claude_md_append": "\n## API Backend\n- REST ou GraphQL\n- Validation avec Joi ou Zod\n- Auth avec JWT ou sessions\n- Rate limiting et CORS configurés"
+    },
+    "nextjs": {
+      "claude_md_append": "\n## Framework: Next.js\n- App Router par défaut\n- Server Components\n- API routes dans app/api/\n- Dev: `npm run dev`"
+    }
+  },
+
+  "claude_md": "# Projet JavaScript / Node.js\n\n## Stack\n- Runtime: Node.js 20 LTS\n- Package manager: npm / pnpm\n\n## Commandes\n- Install: `npm install`\n- Dev: `npm run dev`\n- Test: `npm test`\n- Lint: `npm run lint -- --fix`\n- Format: `npx prettier --write .`\n\n## Conventions\n- ESM (import/export) par défaut\n- ESLint + Prettier\n- Jest ou Vitest pour les tests\n- dotenv pour la configuration",
+
+  "rules": {
+    "javascript-conventions": "---\npaths:\n  - \"**/*.js\"\n  - \"**/*.mjs\"\n  - \"**/*.cjs\"\n---\n# Conventions JavaScript\n- const par défaut, let si mutation nécessaire, jamais var\n- Arrow functions pour les callbacks\n- Destructuring pour les objets et tableaux\n- Optional chaining (?.) et nullish coalescing (??)\n- Async/await plutôt que .then() chains\n- Nommage: camelCase pour variables/fonctions, PascalCase pour classes",
+    "testing": "---\npaths:\n  - \"**/*.test.js\"\n  - \"**/*.spec.js\"\n---\n# Conventions de Tests\n- Jest ou Vitest\n- describe/it lisibles\n- Mock les dépendances externes\n- Couverture cible 80%+"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Lint, test et build le projet Node.js\n---\n\n1. Lint : `npm run lint`\n2. Tests : `npm test`\n3. Build (si applicable) : `npm run build`"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(npm *)",
+        "Bash(npx *)",
+        "Bash(pnpm *)",
+        "Bash(node *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "npx prettier --write $(jq -r '.tool_input.file_path')"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

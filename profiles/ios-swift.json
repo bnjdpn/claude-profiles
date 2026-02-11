@@ -1,0 +1,85 @@
+{
+  "display_name": "iOS / Swift",
+  "description": "Développement iOS, macOS, visionOS avec Swift et Xcode",
+  "detect_markers": ["*.xcodeproj", "*.xcworkspace", "Package.swift"],
+
+  "mcp_servers": {
+    "xcodebuild": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "xcodebuildmcp@latest"],
+      "_comment": "Build, test, run sur simulateur/device. Le MCP iOS le plus complet."
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      },
+      "_comment": "Gestion repos, PRs, issues, CI/CD"
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des frameworks (SwiftUI, UIKit, etc.)"
+    }
+  },
+
+  "variants": {
+    "swiftui": {
+      "claude_md_append": "\n## UI Framework\n- SwiftUI first, UIKit uniquement si nécessaire\n- Utiliser @Observable (iOS 17+) plutôt que ObservableObject\n- Préférer les view modifiers natifs aux custom shapes",
+      "rules": {
+        "swiftui": "---\npaths:\n  - \"**/*.swift\"\n---\n# Conventions SwiftUI\n- Petits composants réutilisables (< 50 lignes par View)\n- Extraire la logique dans des ViewModels avec @Observable\n- Utiliser les previews systématiquement\n- Préférer NavigationStack à NavigationView"
+      }
+    },
+    "uikit": {
+      "claude_md_append": "\n## UI Framework\n- UIKit programmatic (pas de Storyboards)\n- Auto Layout avec NSLayoutConstraint ou SnapKit\n- Coordinator pattern pour la navigation",
+      "rules": {
+        "uikit": "---\npaths:\n  - \"**/*.swift\"\n---\n# Conventions UIKit\n- Pas de Storyboards, tout en code\n- Utiliser les layout anchors ou SnapKit\n- Coordinator pattern pour la navigation\n- Diffable Data Sources pour les collections"
+      }
+    },
+    "spm": {
+      "claude_md_append": "\n## Package Manager\n- Swift Package Manager (SPM)\n- Résolution : `swift package resolve`\n- Build : `swift build`\n- Tests : `swift test`",
+      "mcp_servers": {},
+      "exclude_mcps": []
+    },
+    "cocoapods": {
+      "claude_md_append": "\n## Package Manager\n- CocoaPods\n- Install : `pod install`\n- Toujours ouvrir le .xcworkspace, pas le .xcodeproj\n- Ne pas commiter le dossier Pods/ (ou le commiter selon la convention projet)"
+    }
+  },
+
+  "claude_md": "# Projet iOS / Swift\n\n## Stack\n- Language: Swift 5.9+\n- IDE: Xcode 15+\n- Deployment target: iOS 17+\n- Architecture: MVVM\n\n## Commandes\n- Build: `xcodebuild -scheme <scheme> build`\n- Tests: `xcodebuild test -scheme <scheme> -destination 'platform=iOS Simulator,name=iPhone 16'`\n- Format: `swift format --recursive .`\n\n## Architecture\n- MVVM avec Combine / async-await\n- Dependency injection via protocoles\n- Core Data ou SwiftData pour la persistance locale\n\n## Conventions\n- Suivre les Apple Swift API Design Guidelines\n- camelCase pour variables/fonctions, PascalCase pour types\n- Marquer les niveaux d'accès explicitement (private, internal, public)\n- Documenter les APIs publiques avec des doc comments (///)",
+
+  "rules": {
+    "swift-conventions": "---\npaths:\n  - \"**/*.swift\"\n---\n# Conventions Swift\n- Utiliser `guard let` pour le unwrapping d'optionnels\n- Préférer `let` à `var`\n- Utiliser `@MainActor` pour le code UI\n- Préférer les async/await aux closures de completion\n- Utiliser les Result types pour la gestion d'erreurs\n- Écrire des tests unitaires avec XCTest",
+    "project-structure": "# Structure Projet iOS\n- Organiser par feature, pas par type de fichier\n- Chaque feature a son dossier : Views/, ViewModels/, Models/, Services/\n- Les extensions dans des fichiers séparés (Type+Extension.swift)\n- Les ressources dans Assets.xcassets\n- Les fichiers de configuration dans un dossier Config/"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Build le projet et lance les tests iOS\n---\n\nBuild et test du projet iOS :\n\n1. Trouver le scheme principal : `xcodebuild -list`\n2. Build : `xcodebuild -scheme <scheme> -destination 'platform=iOS Simulator,name=iPhone 16' build`\n3. Tests : `xcodebuild test -scheme <scheme> -destination 'platform=iOS Simulator,name=iPhone 16'`\n4. Vérifier qu'il n'y a pas de warnings",
+    "create-feature": "---\nname: create-feature\ndescription: Scaffolder une nouvelle feature iOS (MVVM)\n---\n\nCréer la structure pour une nouvelle feature `$ARGUMENTS` :\n\n1. Créer le dossier `Features/$ARGUMENTS/`\n2. Créer `Features/$ARGUMENTS/Views/$ARGUMENTS View.swift` — la vue SwiftUI\n3. Créer `Features/$ARGUMENTS/ViewModels/$ARGUMENTS ViewModel.swift` — le view model @Observable\n4. Créer `Features/$ARGUMENTS/Models/` — les modèles de données\n5. Créer `Features/$ARGUMENTS/Services/` — les services/repositories\n6. Ajouter une preview dans la vue\n7. Créer un fichier de test unitaire pour le ViewModel"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(xcodebuild *)",
+        "Bash(swift *)",
+        "Bash(xcrun *)",
+        "Bash(pod *)",
+        "Bash(git *)",
+        "Bash(open *.xcodeproj)",
+        "Bash(open *.xcworkspace)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

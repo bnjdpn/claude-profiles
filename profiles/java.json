@@ -1,0 +1,105 @@
+{
+  "display_name": "Java",
+  "description": "Développement Java (Spring Boot, Quarkus, etc.) avec Maven ou Gradle",
+  "detect_markers": ["pom.xml", "build.gradle", "build.gradle.kts"],
+
+  "mcp_servers": {
+    "jetbrains": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-java"],
+      "_comment": "Intégration JetBrains IDE (IntelliJ IDEA, etc.)"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel (Spring, Jakarta, etc.)"
+    }
+  },
+
+  "variants": {
+    "maven": {
+      "claude_md_append": "\n## Build System: Maven\n- Build: `mvn clean install`\n- Tests: `mvn test`\n- Tests d'intégration: `mvn verify`\n- Exécution: `mvn spring-boot:run`\n- Dependency tree: `mvn dependency:tree`\n- Formattage: `mvn spotless:apply`",
+      "mcp_servers": {
+        "maven-tools": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@anthropic/mcp-server-maven"],
+          "_comment": "Recherche de dépendances Maven Central, versions, résolution d'artefacts"
+        }
+      },
+      "settings_merge": {
+        "permissions": {
+          "allow": [
+            "Bash(mvn *)",
+            "Bash(./mvnw *)"
+          ]
+        }
+      }
+    },
+    "gradle": {
+      "claude_md_append": "\n## Build System: Gradle\n- Build: `./gradlew build`\n- Tests: `./gradlew test`\n- Exécution: `./gradlew bootRun`\n- Dependency tree: `./gradlew dependencies`\n- Clean: `./gradlew clean`",
+      "mcp_servers": {
+        "gradle": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@anthropic/mcp-server-gradle"],
+          "_comment": "Gradle Tooling API : inspect projects, execute tasks, test reporting"
+        }
+      },
+      "exclude_mcps": ["maven-tools"],
+      "settings_merge": {
+        "permissions": {
+          "allow": [
+            "Bash(gradle *)",
+            "Bash(./gradlew *)"
+          ]
+        }
+      }
+    },
+    "spring-boot": {
+      "claude_md_append": "\n## Framework: Spring Boot\n- Configuration via application.yml\n- Profils Spring: dev, test, prod\n- Actuator endpoints: /actuator/health, /actuator/info\n- Hot reload: spring-boot-devtools"
+    },
+    "quarkus": {
+      "claude_md_append": "\n## Framework: Quarkus\n- Dev mode: `./mvnw quarkus:dev` ou `./gradlew quarkusDev`\n- Tests natifs: `./mvnw verify -Pnative`\n- Configuration: application.properties\n- Extensions: `quarkus ext list`"
+    }
+  },
+
+  "claude_md": "# Projet Java\n\n## Stack\n- Language: Java 21+\n- Architecture: Clean Architecture / Hexagonal\n\n## Conventions\n- Google Java Style Guide\n- Indentation 4 espaces\n- Utiliser Lombok pour le boilerplate (@Data, @Builder, @Slf4j)\n- Records Java pour les DTOs et Value Objects\n- Optional plutôt que null\n- Annotations @Nullable / @Nonnull\n\n## Tests\n- JUnit 5 + Mockito pour les tests unitaires\n- Testcontainers pour les tests d'intégration\n- AssertJ pour les assertions fluides\n- Couverture cible: 80%+",
+
+  "rules": {
+    "java-conventions": "---\npaths:\n  - \"**/*.java\"\n---\n# Conventions Java\n- Utiliser des records pour les objets immutables\n- Préférer Optional à null\n- Injection de dépendances par constructeur (pas @Autowired sur les champs)\n- Lombok: @Builder, @Data, @Slf4j\n- Noms de packages en minuscules\n- Un fichier par classe publique\n- Javadoc sur toutes les méthodes publiques",
+    "testing": "---\npaths:\n  - \"**/test/**/*.java\"\n  - \"**/tests/**/*.java\"\n---\n# Conventions de Tests Java\n- Un test par comportement, pas par méthode\n- Nommage: should_ExpectedBehavior_When_Condition\n- Utiliser @Nested pour grouper les tests par contexte\n- AssertJ pour les assertions : assertThat(result).isEqualTo(expected)\n- Mockito: @Mock + @InjectMocks\n- Testcontainers pour les dépendances externes (DB, Redis, etc.)"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Build le projet Java et lance les tests\n---\n\nBuild et test du projet Java :\n\n1. Détecter le build system (Maven si pom.xml, Gradle si build.gradle)\n2. Maven: `mvn clean test` / Gradle: `./gradlew test`\n3. Vérifier les résultats de tests\n4. Si échec, analyser le rapport de test (target/surefire-reports/ ou build/reports/tests/)",
+    "create-service": "---\nname: create-service\ndescription: Créer un nouveau service Java avec son interface, implémentation et tests\n---\n\nCréer un service `$ARGUMENTS` :\n\n1. Créer l'interface dans le package domain/port : `$ARGUMENTSService.java`\n2. Créer l'implémentation dans le package application : `$ARGUMENTSServiceImpl.java`\n3. Créer le test unitaire : `$ARGUMENTSServiceTest.java`\n4. Ajouter l'annotation @Service sur l'implémentation\n5. Injection par constructeur avec @RequiredArgsConstructor (Lombok)"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(java *)",
+        "Bash(javac *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

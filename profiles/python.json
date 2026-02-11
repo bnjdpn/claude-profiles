@@ -1,0 +1,101 @@
+{
+  "display_name": "Python",
+  "description": "Développement Python (Django, FastAPI, Flask, data science, CLI)",
+  "detect_markers": ["pyproject.toml", "setup.py", "requirements.txt", "Pipfile"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des libraries Python"
+    }
+  },
+
+  "variants": {
+    "django": {
+      "claude_md_append": "\n## Framework: Django\n- Dev: `python manage.py runserver`\n- Migrations: `python manage.py makemigrations && python manage.py migrate`\n- Shell: `python manage.py shell_plus`\n- Tests: `python manage.py test`\n- Admin: http://localhost:8000/admin/",
+      "mcp_servers": {
+        "postgres": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres"],
+          "env": {
+            "DATABASE_URL": "${DATABASE_URL:-postgres://localhost/django_dev}"
+          }
+        }
+      },
+      "rules": {
+        "django": "---\npaths:\n  - \"**/*.py\"\n---\n# Conventions Django\n- Un app par domaine métier\n- Fat models, thin views\n- Utiliser les class-based views (CBV) sauf pour les cas simples\n- Django REST Framework pour les APIs\n- Signaux uniquement pour le découplage inter-apps\n- select_related / prefetch_related pour éviter les N+1 queries"
+      }
+    },
+    "fastapi": {
+      "claude_md_append": "\n## Framework: FastAPI\n- Dev: `uvicorn app.main:app --reload`\n- Docs: http://localhost:8000/docs (Swagger)\n- Tests: `pytest`\n- Async par défaut",
+      "mcp_servers": {
+        "postgres": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres"],
+          "env": {
+            "DATABASE_URL": "${DATABASE_URL:-postgres://localhost/fastapi_dev}"
+          }
+        }
+      },
+      "rules": {
+        "fastapi": "---\npaths:\n  - \"**/*.py\"\n---\n# Conventions FastAPI\n- Pydantic models pour la validation\n- Dependency injection via Depends()\n- Routers par domaine dans app/routers/\n- SQLAlchemy ou SQLModel pour l'ORM\n- Background tasks pour les opérations longues\n- Typage strict sur tous les endpoints"
+      }
+    },
+    "flask": {
+      "claude_md_append": "\n## Framework: Flask\n- Dev: `flask run --debug`\n- Tests: `pytest`\n- Extensions: Flask-SQLAlchemy, Flask-Migrate, Flask-Login"
+    },
+    "data-science": {
+      "claude_md_append": "\n## Data Science Stack\n- Jupyter: `jupyter lab`\n- Libs: pandas, numpy, scikit-learn, matplotlib, seaborn\n- Environnement: conda ou venv\n- Données dans data/ (gitignored si sensible)",
+      "rules": {
+        "data-science": "---\npaths:\n  - \"**/*.py\"\n  - \"**/*.ipynb\"\n---\n# Conventions Data Science\n- Notebooks pour l'exploration, scripts .py pour la production\n- Documenter chaque cellule de notebook\n- Reproductibilité : seed aléatoire fixé, versions des libs\n- Pipeline : raw data → processed → features → model\n- Ne jamais commiter de données sensibles"
+      }
+    }
+  },
+
+  "claude_md": "# Projet Python\n\n## Stack\n- Language: Python 3.12+\n- Package manager: uv / pip / poetry\n\n## Commandes\n- Install: `pip install -e '.[dev]'` ou `uv sync`\n- Tests: `pytest`\n- Lint: `ruff check --fix .`\n- Format: `ruff format .`\n- Type check: `mypy .`\n\n## Conventions\n- Type hints partout\n- Docstrings Google style\n- Ruff pour le linting et le formattage\n- pytest pour les tests\n- Couverture cible: 80%+",
+
+  "rules": {
+    "python-conventions": "---\npaths:\n  - \"**/*.py\"\n---\n# Conventions Python\n- Type hints sur toutes les fonctions et méthodes\n- Docstrings Google style sur les fonctions publiques\n- dataclasses ou Pydantic pour les modèles de données\n- Pas de mutable default arguments\n- Context managers (with) pour les ressources\n- f-strings pour le formattage\n- Éviter les imports * (wildcard imports)\n- MAX 88 caractères par ligne (convention Black/Ruff)",
+    "testing": "---\npaths:\n  - \"**/test_*.py\"\n  - \"**/*_test.py\"\n  - \"tests/**/*.py\"\n---\n# Conventions de Tests Python\n- pytest (pas unittest)\n- Fixtures pour le setup\n- Parametrize pour tester plusieurs cas\n- Nommage: test_should_behavior_when_condition\n- Mocker (pytest-mock) pour les mocks\n- Pas de tests qui dépendent de l'ordre d'exécution"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Lance les tests Python avec couverture\n---\n\n1. Vérifier les types : `mypy . --ignore-missing-imports`\n2. Lint : `ruff check .`\n3. Tests : `pytest -v --tb=short`\n4. Couverture : `pytest --cov=. --cov-report=term-missing`",
+    "create-module": "---\nname: create-module\ndescription: Créer un nouveau module Python avec tests\n---\n\nCréer le module `$ARGUMENTS` :\n\n1. Créer `src/$ARGUMENTS/__init__.py`\n2. Créer `src/$ARGUMENTS/service.py` — la logique métier\n3. Créer `src/$ARGUMENTS/models.py` — les modèles de données (dataclass/Pydantic)\n4. Créer `tests/test_$ARGUMENTS.py` — les tests\n5. Ajouter les type hints et docstrings"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(python *)",
+        "Bash(python3 *)",
+        "Bash(pip *)",
+        "Bash(uv *)",
+        "Bash(poetry *)",
+        "Bash(pytest *)",
+        "Bash(ruff *)",
+        "Bash(mypy *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "display_name": "TypeScript / React",
+  "description": "Développement frontend React avec TypeScript",
+  "detect_markers": ["tsconfig.json", "*.tsx"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel React, Next.js, etc."
+    },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-figma"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
+      },
+      "_comment": "Design-to-code depuis Figma Dev Mode"
+    }
+  },
+
+  "variants": {
+    "nextjs": {
+      "claude_md_append": "\n## Framework: Next.js\n- Dev: `npm run dev` (port 3000)\n- Build: `npm run build`\n- App Router (app/) par défaut\n- Server Components par défaut, 'use client' si nécessaire\n- API routes dans app/api/\n- Metadata API pour le SEO",
+      "mcp_servers": {},
+      "rules": {
+        "nextjs": "---\npaths:\n  - \"app/**/*.tsx\"\n  - \"app/**/*.ts\"\n---\n# Conventions Next.js\n- Server Components par défaut\n- 'use client' uniquement si état, effets ou interactivité\n- Utiliser le système de cache et revalidation de Next.js\n- Metadata API pour le SEO\n- Route groups (dossiers) pour l'organisation\n- loading.tsx et error.tsx pour chaque segment de route"
+      }
+    },
+    "react": {
+      "claude_md_append": "\n## Framework: React (Vite)\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Routing: React Router v6+\n- State: Zustand ou React Query"
+    },
+    "vue": {
+      "claude_md_append": "\n## Framework: Vue 3\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Composition API par défaut\n- Pinia pour le state management\n- Vue Router pour le routing"
+    }
+  },
+
+  "claude_md": "# Projet TypeScript / React\n\n## Stack\n- Language: TypeScript 5+\n- Runtime: Node.js 20 LTS\n- Package manager: npm / pnpm\n\n## Commandes\n- Install: `npm install`\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Test: `npm test`\n- Lint: `npm run lint -- --fix`\n- Format: `npx prettier --write .`\n\n## Conventions\n- Composants fonctionnels uniquement (pas de classes)\n- Custom hooks pour la logique réutilisable (use*.ts)\n- Typage strict, pas de `any`\n- Barrel exports (index.ts) par feature",
+
+  "rules": {
+    "typescript": "---\npaths:\n  - \"**/*.ts\"\n  - \"**/*.tsx\"\n---\n# Conventions TypeScript\n- strict mode activé dans tsconfig.json\n- Préférer les interfaces aux types pour les APIs publiques\n- Utiliser des union types discriminées plutôt que des enums\n- Nommage: PascalCase pour les composants/types, camelCase pour le reste\n- Pas de `any`, utiliser `unknown` si nécessaire\n- Documenter les APIs publiques avec JSDoc",
+    "react-patterns": "---\npaths:\n  - \"**/*.tsx\"\n---\n# Patterns React\n- Composants < 150 lignes, extraire si plus gros\n- Custom hooks pour la logique avec état\n- Préférer la composition à l'héritage\n- Mémoization (useMemo, useCallback) uniquement si nécessaire\n- Éviter les prop drilling > 2 niveaux, utiliser le Context ou un state manager\n- Nommer les handlers: handleEventName (ex: handleClick, handleSubmit)",
+    "testing": "---\npaths:\n  - \"**/*.test.ts\"\n  - \"**/*.test.tsx\"\n  - \"**/*.spec.ts\"\n---\n# Conventions de Tests\n- Vitest ou Jest pour les tests unitaires\n- React Testing Library (pas Enzyme)\n- Tester le comportement, pas l'implémentation\n- describe/it avec des noms lisibles en anglais\n- Mock les appels API, pas les composants enfants"
+  },
+
+  "skills": {
+    "create-component": "---\nname: create-component\ndescription: Créer un nouveau composant React avec TypeScript\n---\n\nCréer le composant React `$ARGUMENTS` :\n\n1. Créer `components/$ARGUMENTS/$ARGUMENTS.tsx` — le composant\n2. Créer `components/$ARGUMENTS/$ARGUMENTS.test.tsx` — les tests\n3. Créer `components/$ARGUMENTS/index.ts` — barrel export\n4. Typer les props avec une interface\n5. Ajouter les variantes et états dans les tests",
+    "build-and-test": "---\nname: build-and-test\ndescription: Build le projet et lance les tests TypeScript/React\n---\n\n1. Vérifier les types : `npx tsc --noEmit`\n2. Linter : `npm run lint`\n3. Tests : `npm test`\n4. Build : `npm run build`\n5. Vérifier qu'il n'y a pas de warnings"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(npm *)",
+        "Bash(npx *)",
+        "Bash(pnpm *)",
+        "Bash(node *)",
+        "Bash(jest *)",
+        "Bash(vitest *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "npx prettier --write $(jq -r '.tool_input.file_path')"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

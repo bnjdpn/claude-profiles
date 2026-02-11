@@ -1,0 +1,60 @@
+{
+  "display_name": "C / C++",
+  "description": "Développement C/C++ (CMake, systèmes embarqués, applications)",
+  "detect_markers": ["CMakeLists.txt", "Makefile", "*.cpp"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  },
+
+  "variants": {
+    "cmake": {
+      "claude_md_append": "\n## Build System: CMake\n- Configure: `cmake -B build -DCMAKE_BUILD_TYPE=Debug`\n- Build: `cmake --build build`\n- Test: `cd build && ctest`\n- Install: `cmake --install build`"
+    },
+    "make": {
+      "claude_md_append": "\n## Build System: Make\n- Build: `make`\n- Clean: `make clean`\n- Test: `make test`\n- Install: `make install`"
+    }
+  },
+
+  "claude_md": "# Projet C/C++\n\n## Stack\n- Language: C++20 / C17\n- Compiler: GCC / Clang\n\n## Conventions\n- C++ Core Guidelines\n- Smart pointers (unique_ptr, shared_ptr), pas de raw new/delete\n- RAII pour la gestion des ressources\n- const par défaut\n- Namespaces pour l'organisation\n- Header guards ou #pragma once",
+
+  "rules": {
+    "cpp-conventions": "---\npaths:\n  - \"**/*.cpp\"\n  - \"**/*.hpp\"\n  - \"**/*.h\"\n  - \"**/*.c\"\n---\n# Conventions C/C++\n- Smart pointers (std::unique_ptr, std::shared_ptr)\n- RAII systématiquement\n- const et constexpr généreusement\n- std::string_view pour les paramètres string en lecture\n- std::optional plutôt que des sentinelles\n- Range-based for loops\n- Structured bindings (auto [key, value] = ...)\n- Pas de using namespace std dans les headers"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Configure, build et test le projet C/C++\n---\n\n1. Configure : `cmake -B build -DCMAKE_BUILD_TYPE=Debug`\n2. Build : `cmake --build build -j$(nproc)`\n3. Tests : `cd build && ctest --output-on-failure`"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(cmake *)",
+        "Bash(make *)",
+        "Bash(g++ *)",
+        "Bash(gcc *)",
+        "Bash(clang *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

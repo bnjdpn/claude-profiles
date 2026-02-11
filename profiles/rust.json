@@ -1,0 +1,64 @@
+{
+  "display_name": "Rust",
+  "description": "Développement Rust (Axum, Actix, Tokio, CLI, systèmes)",
+  "detect_markers": ["Cargo.toml"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des crates (Axum, Tokio, Serde, etc.)"
+    }
+  },
+
+  "variants": {
+    "axum": {
+      "claude_md_append": "\n## Framework: Axum\n- Dev: `cargo watch -x run`\n- Routing avec Router\n- Extracteurs pour la validation\n- Tower middleware stack\n- Tokio runtime async"
+    },
+    "actix": {
+      "claude_md_append": "\n## Framework: Actix-Web\n- Dev: `cargo watch -x run`\n- Actor model\n- Extracteurs typés\n- Middleware chain"
+    },
+    "cli": {
+      "claude_md_append": "\n## Application CLI\n- Parser d'arguments: clap (derive)\n- Sortie colorée: colored ou owo-colors\n- Barres de progression: indicatif\n- Erreurs: anyhow + thiserror"
+    }
+  },
+
+  "claude_md": "# Projet Rust\n\n## Stack\n- Language: Rust (edition 2021+)\n- Build: Cargo\n\n## Commandes\n- Build: `cargo build`\n- Tests: `cargo test`\n- Run: `cargo run`\n- Lint: `cargo clippy -- -D warnings`\n- Format: `cargo fmt`\n- Check: `cargo check` (rapide, pas de codegen)\n- Doc: `cargo doc --open`\n\n## Conventions\n- Clippy avec warnings as errors\n- Rustfmt pour le formattage\n- Error handling avec thiserror (libs) et anyhow (apps)\n- Serde pour la (dé)sérialisation\n- Préférer les itérateurs aux boucles explicites",
+
+  "rules": {
+    "rust-conventions": "---\npaths:\n  - \"**/*.rs\"\n---\n# Conventions Rust\n- snake_case pour fonctions/variables, PascalCase pour types/traits\n- Implémenter Display pour les types publics\n- Utiliser #[derive(Debug, Clone)] généreusement\n- thiserror pour les types d'erreur custom\n- Préférer &str à String dans les paramètres\n- Pas de .unwrap() en production (sauf dans les tests)\n- Documenter les APIs publiques avec /// doc comments\n- Utiliser les modules pour organiser (mod.rs ou fichier par module)",
+    "testing": "---\npaths:\n  - \"**/*.rs\"\n---\n# Conventions de Tests Rust\n- Tests unitaires dans le même fichier (#[cfg(test)] mod tests)\n- Tests d'intégration dans tests/\n- Utiliser #[test] et assert!, assert_eq!, assert_ne!\n- Propriétés avec proptest si pertinent\n- Benchmarks avec criterion"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Build le projet Rust et lance les tests + clippy\n---\n\n1. Check rapide : `cargo check`\n2. Clippy : `cargo clippy -- -D warnings`\n3. Tests : `cargo test`\n4. Format check : `cargo fmt -- --check`",
+    "add-crate": "---\nname: add-crate\ndescription: Ajouter une dépendance Rust avec cargo add\n---\n\nAjouter le crate `$ARGUMENTS` :\n\n1. `cargo add $ARGUMENTS`\n2. Vérifier que ça compile : `cargo check`\n3. Lire la doc du crate si besoin : `cargo doc -p $ARGUMENTS --open`"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(cargo *)",
+        "Bash(rustc *)",
+        "Bash(rustup *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}
