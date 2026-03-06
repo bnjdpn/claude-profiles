@@ -271,6 +271,20 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     if overlays is None:
         overlays = []
 
+    # Charger et valider les overlays
+    loaded_overlays: list[tuple[str, dict]] = []
+    for overlay_name in overlays:
+        overlay = load_overlay(overlay_name)
+        # Warning de compatibilité
+        compatible = overlay.get("compatible_profiles", [])
+        if compatible and profile_name not in compatible:
+            print(styled(
+                f"  ⚠ overlay '{overlay_name}' est prévu pour {', '.join(compatible)}, "
+                f"appliqué sur {profile_name}",
+                Colors.YELLOW
+            ))
+        loaded_overlays.append((overlay_name, overlay))
+
     variant_config = {}
     if variant and "variants" in profile:
         variant_config = profile["variants"].get(variant, {})
@@ -278,6 +292,8 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     display_name = profile.get("display_name", profile_name)
     if variant:
         display_name += f" ({variant})"
+    if overlays:
+        display_name += " " + " ".join(f"+{o}" for o in overlays)
 
     print(styled(f"\n{'=' * 60}", Colors.BLUE))
     print(styled(f"  Profil : {display_name}", Colors.BOLD, Colors.CYAN))
@@ -305,6 +321,11 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     for excluded in variant_config.get("exclude_mcps", []):
         mcp_servers.pop(excluded, None)
 
+    # Fusionner les MCP des overlays
+    for _, overlay in loaded_overlays:
+        if overlay.get("mcp_servers"):
+            mcp_servers.update(overlay["mcp_servers"])
+
     if mcp_servers:
         mcp_json = {"mcpServers": mcp_servers}
         mcp_path = path / ".mcp.json"
@@ -319,6 +340,11 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     claude_md = profile.get("claude_md", "")
     if variant_config.get("claude_md_append"):
         claude_md += "\n\n" + variant_config["claude_md_append"]
+
+    # Ajouter le claude_md des overlays
+    for overlay_name, overlay in loaded_overlays:
+        if overlay.get("claude_md"):
+            claude_md += "\n\n---\n\n" + overlay["claude_md"]
 
     if claude_md:
         claude_md_path = path / ".claude" / "CLAUDE.md"
@@ -336,6 +362,11 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     if variant_config.get("rules"):
         rules.update(variant_config["rules"])
 
+    # Fusionner les rules des overlays
+    for _, overlay in loaded_overlays:
+        if overlay.get("rules"):
+            rules.update(overlay["rules"])
+
     for rule_name, rule_content in rules.items():
         rule_path = path / ".claude" / "rules" / f"{rule_name}.md"
         if not dry_run:
@@ -347,6 +378,11 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     skills = {**profile.get("skills", {})}
     if variant_config.get("skills"):
         skills.update(variant_config["skills"])
+
+    # Fusionner les skills des overlays
+    for _, overlay in loaded_overlays:
+        if overlay.get("skills"):
+            skills.update(overlay["skills"])
 
     for skill_name, skill_content in skills.items():
         skill_dir = path / ".claude" / "skills" / skill_name
@@ -366,6 +402,11 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
                 settings[key] = {**settings[key], **val}
             else:
                 settings[key] = val
+
+    # Deep-merge les settings des overlays
+    for _, overlay in loaded_overlays:
+        if overlay.get("settings"):
+            settings = deep_merge(settings, overlay["settings"])
 
     if settings:
         settings_path = path / ".claude" / "settings.json"
@@ -511,6 +552,15 @@ def cmd_apply(args):
     variant = args.variant
     directory = args.directory
 
+    # Parser les overlays (+nom)
+    overlay_names = []
+    for o in args.overlays:
+        name = o.lstrip("+")
+        if not name:
+            print(styled(f"Nom d'overlay invalide : '{o}'", Colors.RED))
+            sys.exit(1)
+        overlay_names.append(name)
+
     if profile_name == "auto":
         detected = detect_project(directory)
         if not detected:
@@ -522,7 +572,7 @@ def cmd_apply(args):
             variant = detect_variant(profile_name, directory)
         print(styled(f"  Auto-détecté : {profile_name}" + (f" ({variant})" if variant else ""), Colors.CYAN))
 
-    apply_profile(profile_name, variant, directory, dry_run=args.dry_run)
+    apply_profile(profile_name, variant, directory, dry_run=args.dry_run, overlays=overlay_names)
 
 
 def cmd_init(args):
@@ -649,6 +699,8 @@ Exemples:
   claude-profiles apply java --variant gradle # Java avec Gradle
   claude-profiles apply auto                 # Détecte et applique auto
   claude-profiles apply auto --dry-run       # Prévisualise sans modifier
+  claude-profiles apply ios-swift +healthkit   # Profil iOS + overlay HealthKit
+  claude-profiles apply ios-swift +healthkit +widgets  # Composition multi-overlays
   claude-profiles list                       # Liste les profils disponibles
   claude-profiles show python                # Détail du profil Python
   claude-profiles init                       # Initialise ~/.claude-profiles/
@@ -677,6 +729,8 @@ Exemples:
     p_apply.add_argument("--variant", "-v", help="Variante spécifique (ex: gradle, maven)")
     p_apply.add_argument("--directory", "-d", default=".", help="Répertoire du projet")
     p_apply.add_argument("--dry-run", action="store_true", help="Prévisualiser sans modifier")
+    p_apply.add_argument("overlays", nargs="*", default=[],
+                         help="Overlays additifs (ex: +healthkit +widgets)")
     p_apply.set_defaults(func=cmd_apply)
 
     # init
