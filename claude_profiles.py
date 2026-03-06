@@ -378,36 +378,16 @@ def generate_file_map(resolved: dict) -> dict[str, str]:
 def apply_profile(profile_name: str, variant: Optional[str] = None, directory: str = ".",
                    dry_run: bool = False, overlays: Optional[list[str]] = None):
     """Applique un profil au répertoire courant."""
-    profile = load_profile(profile_name)
-    path = Path(directory).resolve()
-    generated_files: list[Path] = []
-
-    # Résoudre la variante
-    if variant is None:
-        variant = detect_variant(profile_name, directory)
-
     if overlays is None:
         overlays = []
 
-    # Charger et valider les overlays
-    loaded_overlays: list[tuple[str, dict]] = []
-    for overlay_name in overlays:
-        overlay = load_overlay(overlay_name)
-        # Warning de compatibilité
-        compatible = overlay.get("compatible_profiles", [])
-        if compatible and profile_name not in compatible:
-            print(styled(
-                f"  ⚠ overlay '{overlay_name}' est prévu pour {', '.join(compatible)}, "
-                f"appliqué sur {profile_name}",
-                Colors.YELLOW
-            ))
-        loaded_overlays.append((overlay_name, overlay))
+    resolved = resolve_profile(profile_name, variant, directory, overlays)
+    variant = resolved["variant"]
+    file_map = generate_file_map(resolved)
+    path = Path(directory).resolve()
+    generated_files: list[Path] = []
 
-    variant_config = {}
-    if variant and "variants" in profile:
-        variant_config = profile["variants"].get(variant, {})
-
-    display_name = profile.get("display_name", profile_name)
+    display_name = resolved["display_name"]
     if variant:
         display_name += f" ({variant})"
     if overlays:
@@ -421,7 +401,7 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     if dry_run:
         print(styled("  [MODE DRY-RUN] Aucun fichier ne sera modifié\n", Colors.YELLOW))
 
-    # 1. Créer la structure .claude/
+    # Créer la structure .claude/
     dirs_to_create = [".claude/rules", ".claude/skills"]
     for d in dirs_to_create:
         target = path / d
@@ -430,115 +410,35 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
                 target.mkdir(parents=True, exist_ok=True)
             print(styled(f"  + mkdir {d}/", Colors.GREEN))
 
-    # 2. Générer .mcp.json
-    mcp_servers = {**profile.get("mcp_servers", {})}
-    # Fusionner les MCP de la variante
-    if variant_config.get("mcp_servers"):
-        mcp_servers.update(variant_config["mcp_servers"])
-    # Retirer les MCP exclus par la variante
-    for excluded in variant_config.get("exclude_mcps", []):
-        mcp_servers.pop(excluded, None)
-
-    # Fusionner les MCP des overlays
-    for _, overlay in loaded_overlays:
-        if overlay.get("mcp_servers"):
-            mcp_servers.update(overlay["mcp_servers"])
-
-    if mcp_servers:
-        mcp_json = {"mcpServers": mcp_servers}
-        mcp_path = path / ".mcp.json"
+    # Backup CLAUDE.md si existant
+    claude_md_path = path / ".claude" / "CLAUDE.md"
+    if ".claude/CLAUDE.md" in file_map and claude_md_path.exists():
+        print(styled(f"  ~ .claude/CLAUDE.md existe déjà, sauvegarde en .claude/CLAUDE.md.bak", Colors.YELLOW))
         if not dry_run:
-            mcp_path.write_text(json.dumps(mcp_json, indent=2) + "\n")
-            generated_files.append(mcp_path)
-        print(styled(f"  + .mcp.json", Colors.GREEN) + f" ({len(mcp_servers)} serveurs MCP)")
-        for name in mcp_servers:
-            print(styled(f"      - {name}", Colors.DIM))
+            shutil.copy2(claude_md_path, claude_md_path.with_suffix(".md.bak"))
 
-    # 3. Générer CLAUDE.md
-    claude_md = profile.get("claude_md", "")
-    if variant_config.get("claude_md_append"):
-        claude_md += "\n\n" + variant_config["claude_md_append"]
-
-    # Ajouter le claude_md des overlays
-    for overlay_name, overlay in loaded_overlays:
-        if overlay.get("claude_md"):
-            claude_md += "\n\n---\n\n" + overlay["claude_md"]
-
-    if claude_md:
-        claude_md_path = path / ".claude" / "CLAUDE.md"
-        if claude_md_path.exists():
-            print(styled(f"  ~ .claude/CLAUDE.md existe déjà, sauvegarde en .claude/CLAUDE.md.bak", Colors.YELLOW))
-            if not dry_run:
-                shutil.copy2(claude_md_path, claude_md_path.with_suffix(".md.bak"))
+    # Écrire tous les fichiers
+    for rel_path, content in file_map.items():
+        fp = path / rel_path
         if not dry_run:
-            claude_md_path.write_text(claude_md + "\n")
-            generated_files.append(claude_md_path)
-        print(styled(f"  + .claude/CLAUDE.md", Colors.GREEN))
+            fp.parent.mkdir(parents=True, exist_ok=True)
+            fp.write_text(content)
+            generated_files.append(fp)
+        # Affichage détaillé pour MCP
+        if rel_path == ".mcp.json":
+            mcps = resolved["mcp_servers"]
+            print(styled(f"  + .mcp.json", Colors.GREEN) + f" ({len(mcps)} serveurs MCP)")
+            for name in mcps:
+                print(styled(f"      - {name}", Colors.DIM))
+        else:
+            print(styled(f"  + {rel_path}", Colors.GREEN))
 
-    # 4. Générer les rules
-    rules = {**profile.get("rules", {})}
-    if variant_config.get("rules"):
-        rules.update(variant_config["rules"])
-
-    # Fusionner les rules des overlays
-    for _, overlay in loaded_overlays:
-        if overlay.get("rules"):
-            rules.update(overlay["rules"])
-
-    for rule_name, rule_content in rules.items():
-        rule_path = path / ".claude" / "rules" / f"{rule_name}.md"
-        if not dry_run:
-            rule_path.write_text(rule_content + "\n")
-            generated_files.append(rule_path)
-        print(styled(f"  + .claude/rules/{rule_name}.md", Colors.GREEN))
-
-    # 5. Générer les skills
-    skills = {**profile.get("skills", {})}
-    if variant_config.get("skills"):
-        skills.update(variant_config["skills"])
-
-    # Fusionner les skills des overlays
-    for _, overlay in loaded_overlays:
-        if overlay.get("skills"):
-            skills.update(overlay["skills"])
-
-    for skill_name, skill_content in skills.items():
-        skill_dir = path / ".claude" / "skills" / skill_name
-        if not dry_run:
-            skill_dir.mkdir(parents=True, exist_ok=True)
-            skill_path = skill_dir / "SKILL.md"
-            skill_path.write_text(skill_content + "\n")
-            generated_files.append(skill_path)
-        print(styled(f"  + .claude/skills/{skill_name}/SKILL.md", Colors.GREEN))
-
-    # 6. Générer settings.json
-    settings = profile.get("settings", {})
-    if variant_config.get("settings_merge"):
-        # Fusion simple (1 niveau)
-        for key, val in variant_config["settings_merge"].items():
-            if isinstance(val, dict) and isinstance(settings.get(key), dict):
-                settings[key] = {**settings[key], **val}
-            else:
-                settings[key] = val
-
-    # Deep-merge les settings des overlays
-    for _, overlay in loaded_overlays:
-        if overlay.get("settings"):
-            settings = deep_merge(settings, overlay["settings"])
-
-    if settings:
-        settings_path = path / ".claude" / "settings.json"
-        if not dry_run:
-            settings_path.write_text(json.dumps(settings, indent=2) + "\n")
-            generated_files.append(settings_path)
-        print(styled(f"  + .claude/settings.json", Colors.GREEN))
-
-    # 7. Écrire .applied-profile
+    # Écrire .applied-profile
     if not dry_run and generated_files:
         write_applied_profile(directory, profile_name, variant, overlays, generated_files)
         print(styled(f"  + .claude/.applied-profile", Colors.GREEN) + f" ({len(generated_files)} checksums)")
 
-    # 8. Mettre à jour .gitignore
+    # Mettre à jour .gitignore
     gitignore_entries = [
         ".claude/settings.local.json",
         ".claude/CLAUDE.local.md",
