@@ -22,13 +22,31 @@
 
   "variants": {
     "riverpod": {
-      "claude_md_append": "\n## State Management: Riverpod\n- @riverpod annotation pour les providers\n- ConsumerWidget / ConsumerStatefulWidget\n- ref.watch() pour écouter, ref.read() pour les actions\n- AsyncValue pour les états async"
+      "claude_md_append": "\n## State Management: Riverpod\n- @riverpod annotation pour les providers\n- ConsumerWidget / ConsumerStatefulWidget\n- ref.watch() pour écouter, ref.read() pour les actions\n- AsyncValue pour les états async",
+      "rules": {
+        "riverpod-patterns": {
+          "applies_to": "**/*.dart",
+          "content": "## Riverpod Conventions\n\n- @riverpod annotation avec code generation (riverpod_generator)\n- Provider types : Provider (sync), FutureProvider (async), StreamProvider, NotifierProvider\n- Ref usage : ref.watch() dans le build, ref.read() dans les callbacks\n- AsyncValue pattern : .when(data: , loading: , error: ) pour gérer les états async\n- Famille de providers avec paramètres : @riverpod avec arguments dans la fonction\n- Autodispose par défaut, keepAlive uniquement si nécessaire\n- ProviderScope au root de l'app, ProviderObserver pour le logging\n- Tester avec ProviderContainer et overrides dans les tests"
+        }
+      }
     },
     "bloc": {
-      "claude_md_append": "\n## State Management: BLoC\n- Cubit pour la logique simple, Bloc pour les événements complexes\n- BlocProvider / BlocBuilder / BlocListener\n- États immutables avec Equatable\n- Repository pattern pour l'accès aux données"
+      "claude_md_append": "\n## State Management: BLoC\n- Cubit pour la logique simple, Bloc pour les événements complexes\n- BlocProvider / BlocBuilder / BlocListener\n- États immutables avec Equatable\n- Repository pattern pour l'accès aux données",
+      "rules": {
+        "bloc-patterns": {
+          "applies_to": "**/*.dart",
+          "content": "## BLoC Conventions\n\n- sealed class pour les Events et les States (exhaustive pattern matching)\n- Cubit pour la logique simple (pas d'events), BLoC pour les flux complexes\n- Un BLoC/Cubit par feature, ne pas partager entre features\n- BlocBuilder pour le rebuild UI, BlocListener pour les side effects (navigation, snackbar)\n- BlocConsumer quand builder + listener sont nécessaires\n- Repositories injectés via le constructeur du BLoC\n- BlocProvider en haut de l'arbre widget pour la portée, MultiBlocProvider au root\n- bloc_test package : blocTest() avec build, act, expect pour les tests\n- Naming : <Feature>Bloc, <Feature>Event, <Feature>State"
+        }
+      }
     },
     "getx": {
-      "claude_md_append": "\n## State Management: GetX\n- GetxController pour la logique\n- Obx(() => ...) pour le reactive\n- Get.to() / Get.toNamed() pour la navigation"
+      "claude_md_append": "\n## State Management: GetX\n- GetxController pour la logique\n- Obx(() => ...) pour le reactive\n- Get.to() / Get.toNamed() pour la navigation",
+      "rules": {
+        "getx-patterns": {
+          "applies_to": "**/*.dart",
+          "content": "## GetX Conventions\n\n- GetxController pour la logique, variables réactives avec .obs\n- Bindings pour l'injection : class MyBinding extends Bindings → Get.lazyPut<MyController>()\n- Navigation : Get.toNamed('/route'), GetPage dans le router\n- Réactivité : Obx(() => ...) pour observer les changements dans le widget\n- Workers pour réagir aux changements : ever(), debounce(), interval()\n- GetView<Controller> ou GetWidget<Controller> pour simplifier l'accès au controller\n- State management : .value pour les types simples, .update() pour les objets complexes\n- Internationalisation avec GetMaterialApp et traductions\n- Séparer : controllers/, bindings/, views/, models/ par feature"
+        }
+      }
     }
   },
 

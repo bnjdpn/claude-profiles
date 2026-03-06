@@ -22,13 +22,31 @@
 
   "variants": {
     "axum": {
-      "claude_md_append": "\n## Framework: Axum\n- Dev: `cargo watch -x run`\n- Routing avec Router\n- Extracteurs pour la validation\n- Tower middleware stack\n- Tokio runtime async"
+      "claude_md_append": "\n## Framework: Axum\n- Dev: `cargo watch -x run`\n- Routing avec Router\n- Extracteurs pour la validation\n- Tower middleware stack\n- Tokio runtime async",
+      "rules": {
+        "axum-patterns": {
+          "applies_to": "**/*.rs",
+          "content": "## Axum Conventions\n\n- Extracteurs pour parser les requêtes : Path, Query, Json, State, Extension\n- Ordre des extracteurs important : State et Extension avant Path et Json\n- Handlers comme fonctions async retournant impl IntoResponse\n- État partagé via State<Arc<AppState>> (jamais de state mutable sans Mutex/RwLock)\n- Tower middleware pour les coupes transversales : tower-http (CORS, Tracing, Compression)\n- Router modulaire : Router::new().nest(\"/api/v1\", api_routes())\n- Gestion d'erreurs avec un type AppError implémentant IntoResponse\n- Utiliser axum::extract::FromRequest pour les extracteurs personnalisés"
+        }
+      }
     },
     "actix": {
-      "claude_md_append": "\n## Framework: Actix-Web\n- Dev: `cargo watch -x run`\n- Actor model\n- Extracteurs typés\n- Middleware chain"
+      "claude_md_append": "\n## Framework: Actix-Web\n- Dev: `cargo watch -x run`\n- Actor model\n- Extracteurs typés\n- Middleware chain",
+      "rules": {
+        "actix-patterns": {
+          "applies_to": "**/*.rs",
+          "content": "## Actix-Web Conventions\n\n- Extracteurs : web::Path, web::Query, web::Json, web::Data pour l'état\n- État partagé via web::Data<Arc<AppState>> ou web::Data<Pool>\n- Handlers async avec extracteurs en paramètres, retourner impl Responder\n- Configuration des services dans un scope : web::scope(\"/api\").service(resource)\n- Middleware avec Transform trait ou wrap() pour les middlewares existants\n- Guards pour le routage conditionnel (Header, Host, méthode)\n- Gestion d'erreurs avec ResponseError trait sur les types d'erreur custom\n- Workers par défaut = nombre de CPUs, configurable via HttpServer::new().workers(n)"
+        }
+      }
     },
     "cli": {
-      "claude_md_append": "\n## Application CLI\n- Parser d'arguments: clap (derive)\n- Sortie colorée: colored ou owo-colors\n- Barres de progression: indicatif\n- Erreurs: anyhow + thiserror"
+      "claude_md_append": "\n## Application CLI\n- Parser d'arguments: clap (derive)\n- Sortie colorée: colored ou owo-colors\n- Barres de progression: indicatif\n- Erreurs: anyhow + thiserror",
+      "rules": {
+        "cli-patterns": {
+          "applies_to": "**/*.rs",
+          "content": "## CLI Conventions (Clap)\n\n- Utiliser Clap derive API : #[derive(Parser)] pour la CLI, #[derive(Subcommand)] pour les sous-commandes\n- Structure : #[derive(Args)] pour grouper les options liées\n- Gestion d'erreurs avec anyhow::Result pour le main, thiserror pour les bibliothèques\n- Sortie colorée avec colored ou owo-colors\n- Barres de progression avec indicatif\n- Codes de sortie via std::process::ExitCode\n- Configuration avec config-rs (TOML + env + args)\n- Logging structuré avec tracing + tracing-subscriber"
+        }
+      }
     }
   },
 
@@ -59,6 +77,14 @@
       "deny": [
         "Bash(sudo *)",
         "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "rustfmt $CLAUDE_FILE_PATH"
+        }
       ]
     }
   }

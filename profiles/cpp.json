@@ -21,21 +21,41 @@
 
   "variants": {
     "cmake": {
-      "claude_md_append": "\n## Build System: CMake\n- Configure: `cmake -B build -DCMAKE_BUILD_TYPE=Debug`\n- Build: `cmake --build build`\n- Test: `cd build && ctest`\n- Install: `cmake --install build`"
+      "claude_md_append": "\n## Build System: CMake\n- Configure: `cmake -B build -DCMAKE_BUILD_TYPE=Debug`\n- Build: `cmake --build build`\n- Test: `cd build && ctest`\n- Install: `cmake --install build`",
+      "rules": {
+        "cmake-patterns": {
+          "applies_to": ["**/CMakeLists.txt", "**/*.cmake"],
+          "content": "## CMake Conventions (Modern CMake 3.x)\n\n- cmake_minimum_required(VERSION 3.20) minimum\n- Targets comme unit\u00e9 de base : add_library(), add_executable()\n- target_* au lieu des commandes globales : target_link_libraries, target_include_directories\n- Propri\u00e9t\u00e9s PUBLIC/PRIVATE/INTERFACE pour contr\u00f4ler la propagation\n- FetchContent pour les d\u00e9pendances externes (pas de git submodules)\n- Presets avec CMakePresets.json pour les configurations reproductibles\n- enable_testing() + add_test() pour l'int\u00e9gration CTest\n- S\u00e9parer le build : mkdir build && cmake -B build -S . && cmake --build build"
+        }
+      }
     },
     "make": {
-      "claude_md_append": "\n## Build System: Make\n- Build: `make`\n- Clean: `make clean`\n- Test: `make test`\n- Install: `make install`"
+      "claude_md_append": "\n## Build System: Make\n- Build: `make`\n- Clean: `make clean`\n- Test: `make test`\n- Install: `make install`",
+      "rules": {
+        "make-patterns": {
+          "applies_to": ["**/Makefile", "**/*.mk"],
+          "content": "## Makefile Conventions\n\n- .PHONY pour toutes les cibles non-fichier (all, clean, test, install)\n- Variables en MAJUSCULES : CXX, CXXFLAGS, LDFLAGS, SRCS, OBJS\n- Flags de compilation : -Wall -Wextra -Wpedantic -std=c++17 minimum\n- D\u00e9pendances automatiques avec -MMD -MP et -include $(DEPS)\n- Cibles standard : all, clean, test, install, format\n- Pattern rules : %.o: %.cpp pour la compilation g\u00e9n\u00e9rique\n- S\u00e9paration des objets dans un r\u00e9pertoire build/\n- Variables conditionnelles : DEBUG ?= 0, ifeq ($(DEBUG),1) ajout de -g -O0"
+        }
+      }
     }
   },
 
   "claude_md": "# Projet C/C++\n\n## Stack\n- Language: C++20 / C17\n- Compiler: GCC / Clang\n\n## Conventions\n- C++ Core Guidelines\n- Smart pointers (unique_ptr, shared_ptr), pas de raw new/delete\n- RAII pour la gestion des ressources\n- const par défaut\n- Namespaces pour l'organisation\n- Header guards ou #pragma once",
 
   "rules": {
-    "cpp-conventions": "---\npaths:\n  - \"**/*.cpp\"\n  - \"**/*.hpp\"\n  - \"**/*.h\"\n  - \"**/*.c\"\n---\n# Conventions C/C++\n- Smart pointers (std::unique_ptr, std::shared_ptr)\n- RAII systématiquement\n- const et constexpr généreusement\n- std::string_view pour les paramètres string en lecture\n- std::optional plutôt que des sentinelles\n- Range-based for loops\n- Structured bindings (auto [key, value] = ...)\n- Pas de using namespace std dans les headers"
+    "cpp-conventions": "---\npaths:\n  - \"**/*.cpp\"\n  - \"**/*.hpp\"\n  - \"**/*.h\"\n  - \"**/*.c\"\n---\n# Conventions C/C++\n- Smart pointers (std::unique_ptr, std::shared_ptr)\n- RAII systématiquement\n- const et constexpr généreusement\n- std::string_view pour les paramètres string en lecture\n- std::optional plutôt que des sentinelles\n- Range-based for loops\n- Structured bindings (auto [key, value] = ...)\n- Pas de using namespace std dans les headers",
+    "testing": {
+      "applies_to": ["**/test/**/*.cpp", "**/tests/**/*.cpp", "**/*_test.cpp", "**/*_tests.cpp"],
+      "content": "## Conventions de tests C++\n\n- Google Test (gtest) ou Catch2 comme framework principal\n- Un fichier de test par module/classe : <name>_test.cpp\n- Structure : TEST_F pour les fixtures, TEST_P pour les tests param\u00e9tr\u00e9s\n- Assertions : EXPECT_* pour continuer, ASSERT_* pour arr\u00eater le test\n- Mocking avec Google Mock : MOCK_METHOD, EXPECT_CALL, ON_CALL\n- Tests unitaires isol\u00e9s : mocker les d\u00e9pendances externes (IO, r\u00e9seau, temps)\n- CTest pour l'orchestration : ctest --output-on-failure\n- Couverture avec gcov/lcov ou llvm-cov\n- Nommage : Test_NomClasse_Comportement_Attendu"
+    }
   },
 
   "skills": {
-    "build-and-test": "---\nname: build-and-test\ndescription: Configure, build et test le projet C/C++\n---\n\n1. Configure : `cmake -B build -DCMAKE_BUILD_TYPE=Debug`\n2. Build : `cmake --build build -j$(nproc)`\n3. Tests : `cd build && ctest --output-on-failure`"
+    "build-and-test": "---\nname: build-and-test\ndescription: Configure, build et test le projet C/C++\n---\n\n1. Configure : `cmake -B build -DCMAKE_BUILD_TYPE=Debug`\n2. Build : `cmake --build build -j$(nproc)`\n3. Tests : `cd build && ctest --output-on-failure`",
+    "create-class": {
+      "description": "Scaffolder une classe C++ avec header et implémentation",
+      "content": "## Créer une classe C++\n\n1. Créer le header include/<module>/<ClassName>.hpp\n   - #pragma once en garde d'inclusion\n   - Déclarer la classe avec constructeur, destructeur, méthodes publiques\n   - Rule of Five si gestion de ressources (ou = default)\n2. Créer l'implémentation src/<module>/<ClassName>.cpp\n   - #include du header correspondant\n   - Implémenter les méthodes déclarées\n3. Créer le test test/<module>/<ClassName>_test.cpp\n   - TEST_F avec fixture si état partagé, TEST sinon\n4. Mettre à jour CMakeLists.txt ou Makefile pour inclure les nouveaux fichiers\n5. Vérifier la compilation et les tests"
+    }
   },
 
   "settings": {

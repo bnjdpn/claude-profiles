@@ -22,13 +22,31 @@
 
   "variants": {
     "gin": {
-      "claude_md_append": "\n## Framework: Gin\n- Router performant\n- Middleware chain\n- Binding/validation automatique\n- Dev: `go run . ` ou `air` pour le hot reload"
+      "claude_md_append": "\n## Framework: Gin\n- Router performant\n- Middleware chain\n- Binding/validation automatique\n- Dev: `go run . ` ou `air` pour le hot reload",
+      "rules": {
+        "gin-patterns": {
+          "applies_to": "**/*.go",
+          "content": "## Gin Conventions\n\n- Route groups pour organiser par domaine : v1 := r.Group(\"/api/v1\")\n- Middleware en chaîne : Logger(), Recovery(), Auth(), puis handlers\n- Binding et validation avec c.ShouldBindJSON() et les tags binding:\"required\"\n- Réponses normalisées avec c.JSON(status, gin.H{...})\n- Gestion d'erreurs centralisée via middleware de recovery personnalisé\n- Utiliser gin.Context pour passer les données entre middlewares (c.Set/c.Get)\n- Séparer handlers, services et repositories dans des packages distincts\n- Hot reload avec air en développement"
+        }
+      }
     },
     "echo": {
-      "claude_md_append": "\n## Framework: Echo\n- Routing de haute performance\n- Middleware extensible\n- Binding et validation\n- Dev: `go run .` ou `air`"
+      "claude_md_append": "\n## Framework: Echo\n- Routing de haute performance\n- Middleware extensible\n- Binding et validation\n- Dev: `go run .` ou `air`",
+      "rules": {
+        "echo-patterns": {
+          "applies_to": "**/*.go",
+          "content": "## Echo Conventions\n\n- Route groups : e.Group(\"/api/v1\") pour organiser par version/domaine\n- Middleware : Logger(), Recover(), CORS(), puis middleware personnalisés\n- Binding avec c.Bind() et validation avec go-playground/validator\n- Réponses normalisées avec c.JSON(status, response)\n- Context personnalisé pour étendre echo.Context avec des méthodes métier\n- Error handler centralisé via e.HTTPErrorHandler\n- Séparer handlers, services et repositories\n- Utiliser echo.Map pour les réponses rapides en développement"
+        }
+      }
     },
     "cli": {
-      "claude_md_append": "\n## Application CLI\n- Parser: cobra\n- Config: viper\n- Output formaté: tablewriter, lipgloss, bubbletea"
+      "claude_md_append": "\n## Application CLI\n- Parser: cobra\n- Config: viper\n- Output formaté: tablewriter, lipgloss, bubbletea",
+      "rules": {
+        "cli-patterns": {
+          "applies_to": "**/*.go",
+          "content": "## CLI Conventions (Cobra/Viper)\n\n- Structure : cmd/ pour les commandes, internal/ pour la logique métier\n- Une commande par fichier dans cmd/ (root.go, serve.go, migrate.go)\n- Cobra : PersistentFlags pour les options globales, Flags pour les options locales\n- Viper pour la configuration : fichier YAML/TOML + variables d'env + flags\n- Codes de sortie : 0 (succès), 1 (erreur générale), 2 (mauvaise utilisation)\n- Sortie structurée : --format json|table|text pour la flexibilité\n- Utiliser os.Stderr pour les messages d'erreur, os.Stdout pour les données\n- Couleurs avec lipgloss/termenv, barres de progression avec bubbletea"
+        }
+      }
     }
   },
 
@@ -40,7 +58,11 @@
   },
 
   "skills": {
-    "build-and-test": "---\nname: build-and-test\ndescription: Build, vet, lint et test le projet Go\n---\n\n1. Format : `gofmt -l .`\n2. Vet : `go vet ./...`\n3. Lint : `golangci-lint run` (si disponible)\n4. Tests : `go test -v -race ./...`\n5. Build : `go build ./...`"
+    "build-and-test": "---\nname: build-and-test\ndescription: Build, vet, lint et test le projet Go\n---\n\n1. Format : `gofmt -l .`\n2. Vet : `go vet ./...`\n3. Lint : `golangci-lint run` (si disponible)\n4. Tests : `go test -v -race ./...`\n5. Build : `go build ./...`",
+    "create-handler": {
+      "description": "Scaffolder un handler HTTP Go",
+      "content": "## Créer un handler HTTP\n\n1. Créer le package dans internal/handler/<resource>/\n2. Définir le handler struct avec les dépendances (service, logger)\n3. Implémenter les méthodes : List, Get, Create, Update, Delete\n4. Créer l'interface service dans internal/service/<resource>.go\n5. Ajouter les routes dans le router principal\n6. Écrire les tests avec httptest.NewRecorder et httptest.NewRequest\n7. Mocker le service via l'interface pour les tests unitaires"
+    }
   },
 
   "settings": {
@@ -58,6 +80,14 @@
       "deny": [
         "Bash(sudo *)",
         "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "gofmt -w $CLAUDE_FILE_PATH"
+        }
       ]
     }
   }

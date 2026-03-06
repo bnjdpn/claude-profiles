@@ -30,13 +30,37 @@
 
   "variants": {
     "nestjs": {
-      "claude_md_append": "\n## Framework: NestJS\n- Dev: `npm run start:dev`\n- Modules/Controllers/Services pattern\n- Decorators pour le routing et la DI\n- Pipes pour la validation\n- Guards pour l'auth"
+      "claude_md_append": "\n## Framework: NestJS\n- Dev: `npm run start:dev`\n- Modules/Controllers/Services pattern\n- Decorators pour le routing et la DI\n- Pipes pour la validation\n- Guards pour l'auth",
+      "rules": {
+        "nestjs-patterns": {
+          "applies_to": "**/*.ts",
+          "content": "## NestJS Conventions\n\n- Un module par domaine fonctionnel, respecter la structure Module/Controller/Service/Repository\n- Utiliser les décorateurs NestJS : @Injectable(), @Controller(), @Module(), @Get()/@Post()/@Put()/@Delete()\n- DTOs avec class-validator et class-transformer pour la validation des entrées\n- Utiliser les Guards pour l'authentification, les Pipes pour la validation, les Interceptors pour la transformation\n- Injection de dépendances via le constructeur, jamais d'instanciation manuelle\n- Utiliser @InjectRepository() pour les repositories TypeORM\n- Exception filters personnalisés pour une gestion d'erreurs cohérente\n- Configuration via @nestjs/config avec validation par Joi/Zod"
+        }
+      },
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
+      }
     },
     "express": {
-      "claude_md_append": "\n## Framework: Express + TypeScript\n- Dev: `npm run dev` (tsx ou ts-node)\n- Typage des Request/Response\n- Middleware typés"
+      "claude_md_append": "\n## Framework: Express + TypeScript\n- Dev: `npm run dev` (tsx ou ts-node)\n- Typage des Request/Response\n- Middleware typés",
+      "rules": {
+        "express-patterns": {
+          "applies_to": "**/*.ts",
+          "content": "## Express Conventions\n\n- Middleware en chaîne : validation → auth → handler → error handler\n- Error-handling middleware en dernier avec 4 paramètres (err, req, res, next)\n- Router modulaire : un fichier par ressource dans routes/\n- Validation des entrées avec Zod ou Joi avant le handler\n- Réponses JSON normalisées : { data, error, meta }\n- Utiliser express.json() et helmet() en middleware global\n- Séparer la logique métier dans des services, pas dans les routes\n- Variables d'environnement via dotenv, jamais de secrets en dur"
+        }
+      }
     },
     "fastify": {
-      "claude_md_append": "\n## Framework: Fastify\n- Dev: `npm run dev`\n- Schema-based validation (JSON Schema)\n- Plugin system\n- Très performant"
+      "claude_md_append": "\n## Framework: Fastify\n- Dev: `npm run dev`\n- Schema-based validation (JSON Schema)\n- Plugin system\n- Très performant",
+      "rules": {
+        "fastify-patterns": {
+          "applies_to": "**/*.ts",
+          "content": "## Fastify Conventions\n\n- Architecture en plugins : un plugin par domaine fonctionnel avec fastify.register()\n- JSON Schema pour la validation des requêtes/réponses (input, output, headers)\n- Utiliser les hooks du lifecycle : onRequest, preHandler, preSerialization\n- Décorateurs pour enrichir l'instance Fastify (fastify.decorate)\n- Encapsulation des plugins avec le système de contexte Fastify\n- Sérialisation rapide via fast-json-stringify avec schémas définis\n- Gestion d'erreurs avec setErrorHandler() personnalisé\n- Logging structuré intégré via Pino (fastify.log)"
+        }
+      }
     }
   },
 
@@ -48,7 +72,11 @@
   },
 
   "skills": {
-    "build-and-test": "---\nname: build-and-test\ndescription: Type check, lint, test et build le projet TS/Node\n---\n\n1. Type check : `npx tsc --noEmit`\n2. Lint : `npm run lint`\n3. Tests : `npm test`\n4. Build : `npm run build`"
+    "build-and-test": "---\nname: build-and-test\ndescription: Type check, lint, test et build le projet TS/Node\n---\n\n1. Type check : `npx tsc --noEmit`\n2. Lint : `npm run lint`\n3. Tests : `npm test`\n4. Build : `npm run build`",
+    "create-module": {
+      "description": "Scaffolder un module backend TypeScript",
+      "content": "## Créer un module backend\n\n1. Créer le dossier src/modules/<name>/\n2. Créer les fichiers :\n   - <name>.module.ts (si NestJS) ou <name>.router.ts (si Express/Fastify)\n   - <name>.service.ts (logique métier)\n   - <name>.controller.ts ou <name>.handler.ts\n   - <name>.dto.ts (validation des entrées)\n   - <name>.spec.ts (tests unitaires)\n3. Exporter le module/router et l'enregistrer dans l'application principale\n4. Ajouter les tests d'intégration dans __tests__/"
+    }
   },
 
   "settings": {

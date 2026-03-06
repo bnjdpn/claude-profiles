@@ -22,10 +22,22 @@
 
   "variants": {
     "compose-multiplatform": {
-      "claude_md_append": "\n## UI : Compose Multiplatform\n- UI partagée dans `composeApp/` via Compose Multiplatform\n- Utiliser `expect`/`actual` pour les composants spécifiques à chaque plateforme\n- Material 3 pour le design system\n- Navigation partagée (Voyager, Decompose ou Navigation Compose)\n- Prévisualiser les Composables avec `@Preview` quand possible"
+      "claude_md_append": "\n## UI : Compose Multiplatform\n- UI partagée dans `composeApp/` via Compose Multiplatform\n- Utiliser `expect`/`actual` pour les composants spécifiques à chaque plateforme\n- Material 3 pour le design system\n- Navigation partagée (Voyager, Decompose ou Navigation Compose)\n- Prévisualiser les Composables avec `@Preview` quand possible",
+      "rules": {
+        "compose-mp-patterns": {
+          "applies_to": "**/*.kt",
+          "content": "## Compose Multiplatform Conventions\n\n- UI partagée dans commonMain avec @Composable, platform-specific via expect/actual\n- Material 3 pour le theming : MaterialTheme avec ColorScheme, Typography\n- Navigation : Voyager ou Decompose pour la navigation multiplateforme\n- Resources partagées avec compose.resources (images, strings, fonts)\n- State management : remember, mutableStateOf, collectAsState() pour les Flow\n- expect/actual pour les APIs plateforme (permissions, fichiers, notifications)\n- Previews dans androidMain avec @Preview, desktop previews séparées\n- Responsive : BoxWithConstraints, WindowSizeClass pour adapter aux écrans\n- Tests UI avec ComposeTestRule dans les tests plateforme"
+        }
+      }
     },
     "shared-logic": {
-      "claude_md_append": "\n## Approche : Logique partagée uniquement\n- Logique métier dans `shared/` (commonMain)\n- UI native par plateforme : `androidApp/` (Jetpack Compose ou XML), `iosApp/` (SwiftUI ou UIKit)\n- Le module `shared` expose des interfaces claires consommées par chaque plateforme\n- Pas de dépendance UI dans le module partagé"
+      "claude_md_append": "\n## Approche : Logique partagée uniquement\n- Logique métier dans `shared/` (commonMain)\n- UI native par plateforme : `androidApp/` (Jetpack Compose ou XML), `iosApp/` (SwiftUI ou UIKit)\n- Le module `shared` expose des interfaces claires consommées par chaque plateforme\n- Pas de dépendance UI dans le module partagé",
+      "rules": {
+        "shared-logic-patterns": {
+          "applies_to": "**/*.kt",
+          "content": "## Shared Logic (KMP) Conventions\n\n- commonMain pour le code partagé, *Main (androidMain, iosMain, etc.) pour le spécifique\n- expect/actual pattern : expect dans commonMain, actual dans chaque target\n- Ktor Client pour le réseau multiplateforme, Kotlinx.serialization pour le JSON\n- SQLDelight pour la persistance multiplateforme (SQL → Kotlin type-safe)\n- Koin pour l'injection de dépendances multiplateforme\n- Coroutines : Dispatchers.Default/IO dans commonMain via expect/actual ou bibliothèque\n- Tests dans commonTest avec kotlin.test, tests spécifiques dans *Test source sets\n- Interface Kotlin exposée à Swift via le framework KMP, attention aux types nullables\n- Minimiser les expect/actual : préférer les interfaces avec implémentations par plateforme"
+        }
+      }
     }
   },
 

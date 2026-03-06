@@ -25,16 +25,40 @@
       "claude_md_append": "\n## Framework: ASP.NET Core\n- Dev: `dotnet run` ou `dotnet watch run` (hot reload)\n- Swagger UI: http://localhost:5000/swagger (en développement)\n- Tests: `dotnet test`\n- Migrations EF Core: `dotnet ef migrations add <Nom> && dotnet ef database update`\n\n### Conventions ASP.NET\n- Préférer les Minimal APIs pour les endpoints simples, Controllers pour les cas complexes\n- Pipeline de middleware : ordre explicite (UseRouting → UseAuthentication → UseAuthorization → MapControllers)\n- Injection de dépendances : enregistrer les services dans Program.cs (AddScoped/AddTransient/AddSingleton)\n- Entity Framework Core : DbContext avec Fluent API, migrations versionnées\n- DTOs avec AutoMapper ou Mapster pour le mapping entité ↔ réponse API\n- Validation avec FluentValidation ou DataAnnotations",
       "rules": {
         "aspnet": "---\npaths:\n  - \"**/*.cs\"\n---\n# Conventions ASP.NET Core\n- Minimal APIs pour les endpoints simples, Controllers pour les domaines complexes\n- Pipeline de middleware dans l'ordre correct\n- Injection de dépendances systématique (jamais de new sur les services)\n- Entity Framework Core : Fluent API > DataAnnotations pour la config\n- DTOs séparés des entités (AutoMapper ou Mapster)\n- Validation avec FluentValidation\n- Réponses typées : IResult (Minimal API) ou ActionResult<T> (Controllers)"
+      },
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
       }
     },
     "blazor": {
-      "claude_md_append": "\n## Framework: Blazor\n- Blazor Server : `dotnet run` (connexion SignalR temps réel)\n- Blazor WebAssembly : `dotnet run` (exécution côté client)\n- Hot reload : `dotnet watch run`\n\n### Conventions Blazor\n- Cycle de vie des composants : OnInitializedAsync, OnParametersSetAsync, OnAfterRenderAsync\n- Syntaxe Razor : @code, @inject, @bind, @onclick\n- Gestion d'état : CascadingValue, services Scoped, Fluxor pour les apps complexes\n- Composants réutilisables avec [Parameter] et EventCallback\n- Rendu interactif : choisir Server vs WASM vs Auto selon le cas d'usage"
+      "claude_md_append": "\n## Framework: Blazor\n- Blazor Server : `dotnet run` (connexion SignalR temps réel)\n- Blazor WebAssembly : `dotnet run` (exécution côté client)\n- Hot reload : `dotnet watch run`\n\n### Conventions Blazor\n- Cycle de vie des composants : OnInitializedAsync, OnParametersSetAsync, OnAfterRenderAsync\n- Syntaxe Razor : @code, @inject, @bind, @onclick\n- Gestion d'état : CascadingValue, services Scoped, Fluxor pour les apps complexes\n- Composants réutilisables avec [Parameter] et EventCallback\n- Rendu interactif : choisir Server vs WASM vs Auto selon le cas d'usage",
+      "rules": {
+        "blazor-patterns": {
+          "applies_to": "**/*.razor",
+          "content": "## Blazor Conventions\n\n- Composants Razor : un fichier .razor par composant, code-behind en .razor.cs si complexe\n- Render modes : InteractiveServer, InteractiveWebAssembly, InteractiveAuto selon le besoin\n- Param\u00e8tres via [Parameter], cascading values via [CascadingParameter]\n- Lifecycle : OnInitializedAsync > OnParametersSetAsync > OnAfterRenderAsync\n- EventCallback<T> pour la communication enfant \u2192 parent\n- Injection via @inject dans le markup ou [Inject] dans le code-behind\n- \u00c9tat partag\u00e9 via des services Scoped inject\u00e9s ou Fluxor pour les apps complexes\n- Formulaires avec EditForm, DataAnnotations et ValidationSummary"
+        }
+      }
     },
     "maui": {
-      "claude_md_append": "\n## Framework: .NET MAUI\n- Dev: `dotnet build -t:Run -f net8.0-android` ou `-f net8.0-ios`\n- Hot reload : activé par défaut dans Visual Studio / `dotnet watch`\n\n### Conventions MAUI\n- Architecture MVVM avec CommunityToolkit.Mvvm ([ObservableProperty], [RelayCommand])\n- UI cross-plateforme : XAML ou C# Markup\n- Code spécifique plateforme dans Platforms/ avec #if directives ou partial classes\n- Injection de dépendances via MauiProgram.cs\n- Handlers pour la personnalisation des contrôles natifs\n- Shell pour la navigation (routes enregistrées)"
+      "claude_md_append": "\n## Framework: .NET MAUI\n- Dev: `dotnet build -t:Run -f net8.0-android` ou `-f net8.0-ios`\n- Hot reload : activé par défaut dans Visual Studio / `dotnet watch`\n\n### Conventions MAUI\n- Architecture MVVM avec CommunityToolkit.Mvvm ([ObservableProperty], [RelayCommand])\n- UI cross-plateforme : XAML ou C# Markup\n- Code spécifique plateforme dans Platforms/ avec #if directives ou partial classes\n- Injection de dépendances via MauiProgram.cs\n- Handlers pour la personnalisation des contrôles natifs\n- Shell pour la navigation (routes enregistrées)",
+      "rules": {
+        "maui-patterns": {
+          "applies_to": "**/*.cs",
+          "content": "## .NET MAUI Conventions\n\n- MVVM strict : View (XAML) \u2192 ViewModel \u2192 Model/Service\n- CommunityToolkit.Mvvm : [ObservableProperty], [RelayCommand], ObservableObject\n- Shell navigation : await Shell.Current.GoToAsync(\"route\", parameters)\n- Dependency injection via MauiProgram.cs : builder.Services.AddTransient/Singleton\n- Handlers pour la personnalisation native (pas Custom Renderers)\n- Platform-specific via Platforms/ ou #if ANDROID / IOS\n- Resources : Styles en XAML, images dans Resources/Images/\n- Responsive design avec Grid, FlexLayout, et OnPlatform/OnIdiom"
+        }
+      }
     },
     "console": {
-      "claude_md_append": "\n## Application Console\n- Exécution : `dotnet run` ou `dotnet run -- <arguments>`\n- Publication : `dotnet publish -c Release`\n\n### Conventions Console\n- System.CommandLine pour le parsing d'arguments et sous-commandes\n- Host builder pattern (Microsoft.Extensions.Hosting) pour les services et la config\n- IConfiguration pour la gestion de configuration (appsettings.json, variables d'env)\n- Logging structuré avec Microsoft.Extensions.Logging\n- Annulation propre avec CancellationToken et Console.CancelKeyPress"
+      "claude_md_append": "\n## Application Console\n- Exécution : `dotnet run` ou `dotnet run -- <arguments>`\n- Publication : `dotnet publish -c Release`\n\n### Conventions Console\n- System.CommandLine pour le parsing d'arguments et sous-commandes\n- Host builder pattern (Microsoft.Extensions.Hosting) pour les services et la config\n- IConfiguration pour la gestion de configuration (appsettings.json, variables d'env)\n- Logging structuré avec Microsoft.Extensions.Logging\n- Annulation propre avec CancellationToken et Console.CancelKeyPress",
+      "rules": {
+        "console-patterns": {
+          "applies_to": "**/*.cs",
+          "content": "## Console App Conventions\n\n- System.CommandLine pour le parsing des arguments et sous-commandes\n- Generic Host (Host.CreateDefaultBuilder) pour la DI et la configuration\n- IHostedService pour les services en arri\u00e8re-plan\n- Configuration via appsettings.json + variables d'environnement\n- Logging structur\u00e9 avec ILogger<T> et Microsoft.Extensions.Logging\n- Codes de sortie explicites : 0 succ\u00e8s, 1 erreur, 2 mauvaise utilisation\n- Spectre.Console pour les interfaces CLI riches (tables, progress bars, prompts)\n- Cancellation via CancellationToken pour un arr\u00eat propre (Ctrl+C)"
+        }
+      }
     }
   },
 

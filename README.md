@@ -11,9 +11,10 @@
 ## Features
 
 - **Auto-detection** — identifies your stack from project files (`pyproject.toml`, `*.xcodeproj`, `go.mod`, etc.)
-- **Variant-aware** — detects frameworks within stacks (Django vs FastAPI, SwiftUI vs UIKit, Maven vs Gradle)
-- **MCP servers** — pre-configures the right MCP servers for your stack (GitHub, Context7, Postgres, XcodeBuildMCP, etc.)
-- **Rules & skills** — generates contextual coding rules and slash commands tailored to your language and framework
+- **Variant-aware** — detects frameworks within stacks (Django vs FastAPI, SwiftUI vs UIKit, Maven vs Gradle) — each variant comes with its own framework-specific rules
+- **MCP servers** — pre-configures the right MCP servers for your stack (GitHub, Context7, Postgres, XcodeBuildMCP, etc.) — web framework variants auto-include Postgres
+- **Rules & skills** — generates contextual coding rules and scaffolding skills tailored to your language and framework (2+ rules and 2+ skills per profile)
+- **Formatter hooks** — auto-formats code on edit via hooks (Prettier, ruff, gofmt, rustfmt, mix format, rubocop, php-cs-fixer)
 - **Overlays** — layer additional config on top of any profile (e.g. `+healthkit` for iOS health apps)
 - **Sync** — re-apply your profile after upstream updates without losing local changes
 - **Customizable** — profiles are plain JSON files, easy to edit or create from scratch
@@ -25,29 +26,32 @@
 | Auto-detection | Detects stack + framework variant | — | — |
 | MCP servers | Pre-configured per stack | Set up each one manually | Not included |
 | Rules & skills | Generated per language/framework | Write from scratch | Generic, not stack-specific |
+| Formatter hooks | Auto-format on edit (Prettier, ruff, gofmt…) | Configure manually | Not included |
 | Sync & update | `sync` re-applies without losing local changes | Manual merge | Copy-paste again |
 | Setup time | ~5 seconds | 30+ minutes | 5 minutes + manual tweaks |
 
 ## Supported Stacks
 
-| Profile | Variants |
-|---------|----------|
-| Python | Django, FastAPI, Flask, Data Science |
-| TypeScript / React | Next.js, React, Vue, Svelte |
-| TypeScript / Node | NestJS, Express, Fastify |
-| JavaScript / Node | Express, API, Next.js |
-| Ruby | Rails, Sinatra, CLI |
-| PHP | Laravel, Symfony, WordPress |
-| Java | Maven, Gradle, Spring Boot, Quarkus |
-| C# / .NET | ASP.NET, Blazor, MAUI, Console |
-| Go | Gin, Echo, CLI |
-| Rust | Axum, Actix, CLI |
-| Elixir | Phoenix, LiveView, CLI |
-| iOS / Swift | SwiftUI, UIKit, SPM, CocoaPods, HealthKit, Widgets, Multiplatform |
-| Kotlin Multiplatform | Compose Multiplatform, Shared Logic |
-| Flutter / Dart | Riverpod, BLoC, GetX |
-| Android | Compose, XML Views |
-| C / C++ | CMake, Make |
+| Profile | Variants | Hook | MCP |
+|---------|----------|------|-----|
+| Python | Django, FastAPI, Flask, Data Science | ruff format | GitHub, Context7, Postgres* |
+| TypeScript / React | Next.js, React, Vue, Svelte | Prettier | GitHub, Context7 |
+| TypeScript / Node | NestJS, Express, Fastify | Prettier | GitHub, Context7, Postgres* |
+| JavaScript / Node | Express, API, Next.js | Prettier | GitHub, Context7 |
+| Ruby | Rails, Sinatra, CLI | rubocop | GitHub, Context7, Postgres* |
+| PHP | Laravel, Symfony, WordPress | php-cs-fixer | GitHub, Context7, Postgres* |
+| Java | Maven, Gradle, Spring Boot, Quarkus | — | GitHub, Context7, Postgres* |
+| C# / .NET | ASP.NET, Blazor, MAUI, Console | — | GitHub, Context7, Postgres* |
+| Go | Gin, Echo, CLI | gofmt | GitHub, Context7 |
+| Rust | Axum, Actix, CLI | rustfmt | GitHub, Context7 |
+| Elixir | Phoenix, LiveView, CLI | mix format | GitHub, Context7, Postgres* |
+| iOS / Swift | SwiftUI, UIKit, SPM, CocoaPods, HealthKit, Widgets, Multiplatform | — | XcodeBuildMCP, GitHub, Context7 |
+| Kotlin Multiplatform | Compose Multiplatform, Shared Logic | — | GitHub, Context7 |
+| Flutter / Dart | Riverpod, BLoC, GetX | — | GitHub, Context7 |
+| Android | Compose, XML Views | — | GitHub, Context7 |
+| C / C++ | CMake, Make | — | GitHub, Context7 |
+
+<sub>*Postgres MCP included for web framework variants (Django, FastAPI, Rails, Laravel, Symfony, NestJS, Spring Boot, Quarkus, ASP.NET, Phoenix, LiveView)</sub>
 
 ## Quick Start
 

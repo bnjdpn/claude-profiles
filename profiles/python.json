@@ -54,7 +54,13 @@
       }
     },
     "flask": {
-      "claude_md_append": "\n## Framework: Flask\n- Dev: `flask run --debug`\n- Tests: `pytest`\n- Extensions: Flask-SQLAlchemy, Flask-Migrate, Flask-Login"
+      "claude_md_append": "\n## Framework: Flask\n- Dev: `flask run --debug`\n- Tests: `pytest`\n- Extensions: Flask-SQLAlchemy, Flask-Migrate, Flask-Login",
+      "rules": {
+        "flask-patterns": {
+          "applies_to": "**/*.py",
+          "content": "## Flask Conventions\n\n- Application Factory pattern : create_app() dans app/__init__.py\n- Blueprints pour modulariser : un blueprint par domaine fonctionnel\n- Extensions initialisées dans create_app() : db.init_app(app), migrate.init_app(app)\n- Configuration via classes : Config, DevelopmentConfig, ProductionConfig\n- Flask-SQLAlchemy pour l'ORM, Flask-Migrate pour les migrations Alembic\n- Décorateurs de route : @bp.route('/path', methods=['GET', 'POST'])\n- Gestion d'erreurs : @app.errorhandler(404) pour les pages d'erreur personnalisées\n- Templates Jinja2 dans templates/, fichiers statiques dans static/\n- Context processors pour les variables globales de template"
+        }
+      }
     },
     "data-science": {
       "claude_md_append": "\n## Data Science Stack\n- Jupyter: `jupyter lab`\n- Libs: pandas, numpy, scikit-learn, matplotlib, seaborn\n- Environnement: conda ou venv\n- Données dans data/ (gitignored si sensible)",
@@ -96,6 +102,14 @@
       "deny": [
         "Bash(sudo *)",
         "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "ruff format $CLAUDE_FILE_PATH"
+        }
       ]
     }
   }

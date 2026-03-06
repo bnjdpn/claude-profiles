@@ -45,10 +45,34 @@
       }
     },
     "spring-boot": {
-      "claude_md_append": "\n## Framework: Spring Boot\n- Configuration via application.yml\n- Profils Spring: dev, test, prod\n- Actuator endpoints: /actuator/health, /actuator/info\n- Hot reload: spring-boot-devtools"
+      "claude_md_append": "\n## Framework: Spring Boot\n- Configuration via application.yml\n- Profils Spring: dev, test, prod\n- Actuator endpoints: /actuator/health, /actuator/info\n- Hot reload: spring-boot-devtools",
+      "rules": {
+        "spring-patterns": {
+          "applies_to": "**/*.java",
+          "content": "## Spring Boot Conventions\n\n- Architecture en couches : @Controller/@RestController \u2192 @Service \u2192 @Repository\n- @RestController pour les API REST, @Controller pour les vues (Thymeleaf)\n- Injection de d\u00e9pendances par constructeur uniquement (pas @Autowired sur les champs)\n- @Transactional sur la couche service, pas sur les controllers\n- Configuration par profils : application-{dev,test,prod}.yml\n- DTOs pour les entr\u00e9es/sorties API, jamais exposer les entit\u00e9s JPA directement\n- @ControllerAdvice + @ExceptionHandler pour la gestion d'erreurs centralis\u00e9e\n- Spring Data JPA : utiliser les query methods, @Query pour les requ\u00eates complexes\n- Actuator activ\u00e9 pour le monitoring (/health, /info, /metrics)"
+        }
+      },
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
+      }
     },
     "quarkus": {
-      "claude_md_append": "\n## Framework: Quarkus\n- Dev mode: `./mvnw quarkus:dev` ou `./gradlew quarkusDev`\n- Tests natifs: `./mvnw verify -Pnative`\n- Configuration: application.properties\n- Extensions: `quarkus ext list`"
+      "claude_md_append": "\n## Framework: Quarkus\n- Dev mode: `./mvnw quarkus:dev` ou `./gradlew quarkusDev`\n- Tests natifs: `./mvnw verify -Pnative`\n- Configuration: application.properties\n- Extensions: `quarkus ext list`",
+      "rules": {
+        "quarkus-patterns": {
+          "applies_to": "**/*.java",
+          "content": "## Quarkus Conventions\n\n- CDI pour l'injection : @ApplicationScoped, @RequestScoped, @Inject\n- JAX-RS pour les endpoints : @Path, @GET, @POST, @Produces/@Consumes\n- Panache pour la persistance : extend PanacheEntity (Active Record) ou PanacheRepository\n- Configuration via application.properties avec @ConfigProperty\n- MicroProfile Health, Metrics et OpenAPI pour l'observabilit\u00e9\n- Dev Services : Quarkus d\u00e9marre automatiquement les d\u00e9pendances (DB, Kafka) en dev\n- Mode dev avec quarkus dev pour le hot-reload\n- Native compilation avec -Dnative pour GraalVM"
+        }
+      },
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
+      }
     }
   },
 

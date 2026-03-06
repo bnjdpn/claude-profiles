@@ -39,6 +39,12 @@
     },
     "symfony": {
       "claude_md_append": "\n## Framework: Symfony\n- Dev: `symfony serve`\n- Console: `php bin/console`\n- Migrations Doctrine: `php bin/console doctrine:migrations:migrate`\n- Générer une migration: `php bin/console doctrine:migrations:diff`\n- Vider le cache: `php bin/console cache:clear`\n- Debug routes: `php bin/console debug:router`\n- Debug services: `php bin/console debug:container`",
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
+      },
       "rules": {
         "symfony": "---\npaths:\n  - \"**/*.php\"\n---\n# Conventions Symfony\n- Services déclarés et injectés via le conteneur de dépendances\n- Injection de dépendances par constructeur (autowiring)\n- Entités Doctrine avec annotations/attributs PHP 8\n- Templates Twig pour le rendu HTML\n- Form types pour la gestion des formulaires\n- Voters pour l'autorisation\n- Event subscribers pour le découplage\n- Configuration YAML dans config/packages/"
       }
@@ -81,6 +87,14 @@
       "deny": [
         "Bash(sudo *)",
         "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "php-cs-fixer fix $CLAUDE_FILE_PATH --quiet 2>/dev/null || true"
+        }
       ]
     }
   }

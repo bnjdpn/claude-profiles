@@ -22,13 +22,43 @@
 
   "variants": {
     "phoenix": {
-      "claude_md_append": "\n## Framework: Phoenix\n- Serveur de développement : `mix phx.server`\n- Console interactive : `iex -S mix phx.server`\n- Routes : `mix phx.routes`\n- Migrations : `mix ecto.migrate` / `mix ecto.rollback`\n- Génération : `mix phx.gen.context`, `mix phx.gen.html`, `mix phx.gen.json`\n\n### Conventions Phoenix\n- Contexts : modules frontières qui encapsulent la logique métier\n- Schemas : modules Ecto décrivant les structures de données\n- Changesets : validation et transformation des données entrantes\n- Plugs : composition de middlewares dans le pipeline HTTP\n- LiveView : utiliser si applicable pour les interfaces temps réel"
+      "claude_md_append": "\n## Framework: Phoenix\n- Serveur de développement : `mix phx.server`\n- Console interactive : `iex -S mix phx.server`\n- Routes : `mix phx.routes`\n- Migrations : `mix ecto.migrate` / `mix ecto.rollback`\n- Génération : `mix phx.gen.context`, `mix phx.gen.html`, `mix phx.gen.json`\n\n### Conventions Phoenix\n- Contexts : modules frontières qui encapsulent la logique métier\n- Schemas : modules Ecto décrivant les structures de données\n- Changesets : validation et transformation des données entrantes\n- Plugs : composition de middlewares dans le pipeline HTTP\n- LiveView : utiliser si applicable pour les interfaces temps réel",
+      "rules": {
+        "phoenix-patterns": {
+          "applies_to": ["**/*.ex", "**/*.exs"],
+          "content": "## Phoenix Conventions\n\n- Contexts comme façade : un module par domaine (Accounts, Catalog), pas d'appel direct au Repo\n- Schemas Ecto avec changesets pour la validation : cast → validate_required → validate_format\n- Controllers minces : déléguer la logique aux Contexts\n- Phoenix Components (HEEx) : function components réutilisables avec attr et slot\n- Router : scope pour grouper, pipe_through pour les pipelines de middleware\n- Migrations réversibles : change/0 quand possible, up/down sinon\n- PubSub pour la communication temps réel entre processus\n- Tâches async avec Task.Supervisor pour les opérations en arrière-plan"
+        }
+      },
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
+      }
     },
     "liveview": {
-      "claude_md_append": "\n## Framework: Phoenix LiveView\n- `handle_event/3` : gestion des événements côté client\n- `assign/2` et `assign/3` : mise à jour des assigns du socket\n- `push_event/3` : envoi d'événements vers le client JavaScript\n- Streams : `stream/4`, `stream_insert/3`, `stream_delete/2` pour les grandes listes\n- Composants : `live_component/1`, composants fonctionnels avec `attr` et `slot`\n- Hooks JS : `phx-hook` pour l'interopérabilité JavaScript\n- Navigation : `push_navigate/2`, `push_patch/2` pour le routage côté client"
+      "claude_md_append": "\n## Framework: Phoenix LiveView\n- `handle_event/3` : gestion des événements côté client\n- `assign/2` et `assign/3` : mise à jour des assigns du socket\n- `push_event/3` : envoi d'événements vers le client JavaScript\n- Streams : `stream/4`, `stream_insert/3`, `stream_delete/2` pour les grandes listes\n- Composants : `live_component/1`, composants fonctionnels avec `attr` et `slot`\n- Hooks JS : `phx-hook` pour l'interopérabilité JavaScript\n- Navigation : `push_navigate/2`, `push_patch/2` pour le routage côté client",
+      "rules": {
+        "liveview-patterns": {
+          "applies_to": ["**/*.ex", "**/*.heex"],
+          "content": "## LiveView Conventions\n\n- Lifecycle : mount/3 → handle_params/3 → render/1, puis handle_event/3 et handle_info/2\n- Assigns minimalistes : ne stocker que les données nécessaires au template\n- Streams (stream/3) pour les grandes listes au lieu de listes en assign\n- phx-click, phx-change, phx-submit pour les événements utilisateur\n- LiveComponents pour l'isolation d'état : live_component avec update/2\n- JS commands (JS.toggle, JS.push) pour les interactions côté client sans roundtrip\n- PubSub pour les mises à jour temps réel entre LiveViews\n- Uploads avec allow_upload/3 et consume_uploaded_entries/3\n- Tests avec live/2 et assert_patch/assert_redirect dans ConnCase"
+        }
+      },
+      "mcp_servers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"]
+        }
+      }
     },
     "cli": {
-      "claude_md_append": "\n## Application CLI\n- Escript : `mix escript.build` pour générer un exécutable autonome\n- Mix tasks : `mix help` pour lister, `mix <task>` pour exécuter\n- OptionParser : parsing d'arguments avec `OptionParser.parse/2`\n- Sortie formatée : `IO.puts/1`, `IO.ANSI` pour les couleurs\n- Configuration : `Application.get_env/3` ou fichiers de config Mix"
+      "claude_md_append": "\n## Application CLI\n- Escript : `mix escript.build` pour générer un exécutable autonome\n- Mix tasks : `mix help` pour lister, `mix <task>` pour exécuter\n- OptionParser : parsing d'arguments avec `OptionParser.parse/2`\n- Sortie formatée : `IO.puts/1`, `IO.ANSI` pour les couleurs\n- Configuration : `Application.get_env/3` ou fichiers de config Mix",
+      "rules": {
+        "cli-patterns": {
+          "applies_to": ["**/*.ex", "**/*.exs"],
+          "content": "## CLI Conventions (Elixir)\n\n- escript pour les CLI distribuables : def escript dans mix.exs avec main_module\n- Mix tasks personnalisées dans lib/mix/tasks/ : mix my_app.task_name\n- OptionParser.parse!/2 pour le parsing des arguments avec strict validation\n- IO.puts pour la sortie standard, IO.warn pour stderr\n- ExUnit pour les tests, ExUnit.CaptureIO pour tester les sorties\n- Configuration via Application.get_env ou fichier config/\n- Codes de sortie avec System.halt(code)\n- Releases avec mix release pour le packaging en production"
+        }
+      }
     }
   },
 
@@ -59,6 +89,14 @@
       "deny": [
         "Bash(sudo *)",
         "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "mix format $CLAUDE_FILE_PATH"
+        }
       ]
     }
   }

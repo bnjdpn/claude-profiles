@@ -22,10 +22,22 @@
 
   "variants": {
     "compose": {
-      "claude_md_append": "\n## UI: Jetpack Compose\n- Composables fonctionnels\n- State hoisting : état remonté au parent\n- Material 3 components\n- Navigation Compose\n- Preview annotations systématiques"
+      "claude_md_append": "\n## UI: Jetpack Compose\n- Composables fonctionnels\n- State hoisting : état remonté au parent\n- Material 3 components\n- Navigation Compose\n- Preview annotations systématiques",
+      "rules": {
+        "compose-patterns": {
+          "applies_to": "**/*.kt",
+          "content": "## Jetpack Compose Conventions\n\n- Composables stateless : hoister l'\u00e9tat vers le parent (state hoisting)\n- Nommage : PascalCase pour les composables, camelCase pour les modificateurs\n- Modifier en premier param\u00e8tre optionnel : @Composable fun MyComp(modifier: Modifier = Modifier)\n- remember {} et rememberSaveable {} pour la conservation d'\u00e9tat local\n- Side effects : LaunchedEffect, DisposableEffect, SideEffect selon le cas\n- Navigation avec NavHost et NavController, arguments typ\u00e9s\n- Theming via MaterialTheme : colors, typography, shapes (pas de valeurs en dur)\n- Preview avec @Preview pour chaque composant significatif\n- \u00c9viter les recompositions inutiles : cl\u00e9s stables, derivedStateOf, Immutable"
+        }
+      }
     },
     "xml-views": {
-      "claude_md_append": "\n## UI: XML Views\n- ConstraintLayout par défaut\n- ViewBinding (pas de findViewById)\n- Fragments avec Navigation Component\n- RecyclerView + ListAdapter + DiffUtil"
+      "claude_md_append": "\n## UI: XML Views\n- ConstraintLayout par défaut\n- ViewBinding (pas de findViewById)\n- Fragments avec Navigation Component\n- RecyclerView + ListAdapter + DiffUtil",
+      "rules": {
+        "xmlviews-patterns": {
+          "applies_to": ["**/*.kt", "**/*.xml"],
+          "content": "## Android XML Views Conventions\n\n- ViewBinding activ\u00e9, pas de findViewById (binding.myView)\n- RecyclerView avec ListAdapter et DiffUtil.ItemCallback pour les listes\n- Fragments pour la navigation, Activities comme conteneurs\n- Navigation Component avec NavGraph et Safe Args pour les arguments typ\u00e9s\n- ConstraintLayout pour les layouts complexes, \u00e9viter les imbrications profondes\n- Lifecycle-aware : observer dans onViewCreated, nettoyer dans onDestroyView\n- ViewModels partag\u00e9s entre fragments via activityViewModels()\n- Data Binding ou ViewBinding (pr\u00e9f\u00e9rer ViewBinding pour la simplicit\u00e9)"
+        }
+      }
     }
   },
 
@@ -37,7 +49,11 @@
   },
 
   "skills": {
-    "build-and-test": "---\nname: build-and-test\ndescription: Build et test le projet Android\n---\n\n1. Lint : `./gradlew lint`\n2. Tests unitaires : `./gradlew test`\n3. Build debug : `./gradlew assembleDebug`\n4. Vérifier le rapport de lint : app/build/reports/lint-results.html"
+    "build-and-test": "---\nname: build-and-test\ndescription: Build et test le projet Android\n---\n\n1. Lint : `./gradlew lint`\n2. Tests unitaires : `./gradlew test`\n3. Build debug : `./gradlew assembleDebug`\n4. Vérifier le rapport de lint : app/build/reports/lint-results.html",
+    "create-screen": {
+      "description": "Scaffolder un écran Android complet",
+      "content": "## Créer un écran Android\n\n1. Créer le ViewModel dans ui/<feature>/<Feature>ViewModel.kt\n   - Étendre ViewModel(), exposer un StateFlow<UiState>\n   - Définir le data class UiState et les sealed interface UiEvent\n2. Créer l'écran :\n   - Compose : ui/<feature>/<Feature>Screen.kt avec @Composable\n   - XML : layout/<feature>_fragment.xml + ui/<feature>/<Feature>Fragment.kt\n3. Ajouter la navigation (route Compose ou NavGraph destination)\n4. Créer le test du ViewModel dans test/ui/<feature>/<Feature>ViewModelTest.kt\n5. Connecter au repository/use case existant via injection Hilt"
+    }
   },
 
   "settings": {

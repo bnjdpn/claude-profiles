@@ -22,13 +22,31 @@
 
   "variants": {
     "express": {
-      "claude_md_append": "\n## Framework: Express\n- Dev: `npm run dev` (nodemon)\n- Middleware pattern\n- Router par domaine dans routes/\n- Error handling middleware en dernier"
+      "claude_md_append": "\n## Framework: Express\n- Dev: `npm run dev` (nodemon)\n- Middleware pattern\n- Router par domaine dans routes/\n- Error handling middleware en dernier",
+      "rules": {
+        "express-patterns": {
+          "applies_to": "**/*.js",
+          "content": "## Express Conventions\n\n- Middleware en chaîne : validation → auth → handler → error handler\n- Error-handling middleware avec 4 paramètres (err, req, res, next)\n- Router modulaire : un fichier par ressource dans routes/\n- Validation des entrées avec Joi ou express-validator\n- Réponses JSON normalisées : { data, error, meta }\n- Utiliser express.json() et helmet() en middleware global\n- Séparer la logique métier dans des services, pas dans les routes"
+        }
+      }
     },
     "api": {
-      "claude_md_append": "\n## API Backend\n- REST ou GraphQL\n- Validation avec Joi ou Zod\n- Auth avec JWT ou sessions\n- Rate limiting et CORS configurés"
+      "claude_md_append": "\n## API Backend\n- REST ou GraphQL\n- Validation avec Joi ou Zod\n- Auth avec JWT ou sessions\n- Rate limiting et CORS configurés",
+      "rules": {
+        "api-conventions": {
+          "applies_to": "**/*.js",
+          "content": "## API REST Conventions\n\n- Nommage des endpoints : pluriel, kebab-case (/api/users, /api/user-profiles)\n- Verbes HTTP corrects : GET (lecture), POST (création), PUT (remplacement), PATCH (modification partielle), DELETE\n- Codes de statut appropriés : 200 OK, 201 Created, 204 No Content, 400 Bad Request, 404 Not Found, 422 Unprocessable Entity\n- Pagination normalisée : ?page=1&limit=20, réponse avec { data, meta: { total, page, limit } }\n- Validation des entrées systématique avant traitement\n- Gestion d'erreurs centralisée avec format cohérent : { error: { code, message, details } }\n- Versionner l'API via le chemin (/api/v1/) ou le header Accept"
+        }
+      }
     },
     "nextjs": {
-      "claude_md_append": "\n## Framework: Next.js\n- App Router par défaut\n- Server Components\n- API routes dans app/api/\n- Dev: `npm run dev`"
+      "claude_md_append": "\n## Framework: Next.js\n- App Router par défaut\n- Server Components\n- API routes dans app/api/\n- Dev: `npm run dev`",
+      "rules": {
+        "nextjs-patterns": {
+          "applies_to": ["**/*.js", "**/*.jsx"],
+          "content": "## Next.js App Router Conventions\n\n- Utiliser le App Router (app/) et non le Pages Router\n- Server Components par défaut, 'use client' uniquement quand nécessaire (hooks, événements, browser APIs)\n- Fichiers spéciaux : layout.js, page.js, loading.js, error.js, not-found.js\n- Data fetching dans les Server Components avec fetch() + revalidation\n- Server Actions avec 'use server' pour les mutations\n- Metadata API pour le SEO : export const metadata ou generateMetadata()\n- Route handlers dans app/api/ pour les endpoints API\n- Utiliser next/image, next/link, next/font pour les optimisations"
+        }
+      }
     }
   },
 
@@ -40,7 +58,11 @@
   },
 
   "skills": {
-    "build-and-test": "---\nname: build-and-test\ndescription: Lint, test et build le projet Node.js\n---\n\n1. Lint : `npm run lint`\n2. Tests : `npm test`\n3. Build (si applicable) : `npm run build`"
+    "build-and-test": "---\nname: build-and-test\ndescription: Lint, test et build le projet Node.js\n---\n\n1. Lint : `npm run lint`\n2. Tests : `npm test`\n3. Build (si applicable) : `npm run build`",
+    "create-route": {
+      "description": "Scaffolder un endpoint API",
+      "content": "## Créer un endpoint API\n\n1. Créer le fichier routes/<resource>.js\n2. Définir le router Express avec les opérations CRUD :\n   - GET / (liste), GET /:id (détail), POST / (création), PUT /:id (modification), DELETE /:id\n3. Créer le service dans services/<resource>.service.js\n4. Ajouter la validation des entrées (middleware)\n5. Enregistrer le router dans l'app principale\n6. Créer les tests dans __tests__/<resource>.test.js"
+    }
   },
 
   "settings": {

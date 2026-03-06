@@ -38,10 +38,22 @@
       }
     },
     "sinatra": {
-      "claude_md_append": "\n## Framework: Sinatra\n- Style classique : `ruby app.rb` (simple, rapide)\n- Style modulaire : hériter de `Sinatra::Base` pour les apps complexes\n- Rechargement : `gem 'sinatra-reloader'` en développement\n- Rack middleware : `use Rack::Session::Cookie` etc.\n- Configuration par environnement : `configure :development do ... end`\n- Templates : ERB, Haml, Slim dans `views/`\n- Fichiers statiques dans `public/`\n- Tests : `rack-test` pour tester les endpoints"
+      "claude_md_append": "\n## Framework: Sinatra\n- Style classique : `ruby app.rb` (simple, rapide)\n- Style modulaire : hériter de `Sinatra::Base` pour les apps complexes\n- Rechargement : `gem 'sinatra-reloader'` en développement\n- Rack middleware : `use Rack::Session::Cookie` etc.\n- Configuration par environnement : `configure :development do ... end`\n- Templates : ERB, Haml, Slim dans `views/`\n- Fichiers statiques dans `public/`\n- Tests : `rack-test` pour tester les endpoints",
+      "rules": {
+        "sinatra-patterns": {
+          "applies_to": "**/*.rb",
+          "content": "## Sinatra Conventions\n\n- Modular style (class MyApp < Sinatra::Base) pour les apps non-triviales\n- Routes RESTful : get/post/put/patch/delete avec des blocs concis\n- Helpers pour la logique réutilisable : helpers do ... end\n- Middleware Rack : use Rack::Logger, use Rack::Protection\n- Configuration par environnement : configure :development, :production do\n- Templates ERB/Haml dans views/, layouts avec yield\n- Params validation manuelle ou avec dry-validation\n- Structure : app.rb (routes), config.ru (Rack), lib/ (logique métier)"
+        }
+      }
     },
     "cli": {
-      "claude_md_append": "\n## Développement CLI Ruby\n- Thor : framework CLI recommandé (`class MyCLI < Thor`)\n- OptionParser : stdlib pour les gems légères\n- TTY toolkit : `tty-prompt`, `tty-table`, `tty-spinner` pour l'UX terminal\n- Structure recommandée : `lib/` + `exe/` (ou `bin/`)\n- Gemspec : déclarer les executables dans `spec.executables`\n- Tests CLI : capturer stdout/stderr avec `StringIO`\n- Exit codes : 0 = succès, 1 = erreur, 2 = usage incorrect"
+      "claude_md_append": "\n## Développement CLI Ruby\n- Thor : framework CLI recommandé (`class MyCLI < Thor`)\n- OptionParser : stdlib pour les gems légères\n- TTY toolkit : `tty-prompt`, `tty-table`, `tty-spinner` pour l'UX terminal\n- Structure recommandée : `lib/` + `exe/` (ou `bin/`)\n- Gemspec : déclarer les executables dans `spec.executables`\n- Tests CLI : capturer stdout/stderr avec `StringIO`\n- Exit codes : 0 = succès, 1 = erreur, 2 = usage incorrect",
+      "rules": {
+        "cli-patterns": {
+          "applies_to": "**/*.rb",
+          "content": "## Ruby CLI Conventions\n\n- Thor pour les CLI complexes avec sous-commandes et options typées\n- OptionParser (stdlib) pour les scripts simples\n- Codes de sortie : exit 0 (succès), exit 1 (erreur), abort(\"message\") pour erreur + message\n- $stdout pour les données, $stderr pour les messages d'erreur et de progression\n- TTY::Prompt, TTY::Table, TTY::ProgressBar pour l'interactivité\n- Bundler inline (gemfile do ... end) pour les scripts autonomes\n- Structure : lib/ pour la logique, bin/ ou exe/ pour les exécutables\n- Tests avec RSpec : capture de STDOUT via StringIO ou capture helper"
+        }
+      }
     }
   },
 
@@ -75,6 +87,14 @@
       "deny": [
         "Bash(sudo *)",
         "Bash(rm -rf *)"
+      ]
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "rubocop -A --fail-level E $CLAUDE_FILE_PATH 2>/dev/null || true"
+        }
       ]
     }
   }

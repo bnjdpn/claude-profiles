@@ -29,10 +29,22 @@
       }
     },
     "react": {
-      "claude_md_append": "\n## Framework: React (Vite)\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Routing: React Router v6+\n- State: Zustand ou React Query"
+      "claude_md_append": "\n## Framework: React (Vite)\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Routing: React Router v6+\n- State: Zustand ou React Query",
+      "rules": {
+        "react-spa-patterns": {
+          "applies_to": ["**/*.tsx", "**/*.ts"],
+          "content": "## React SPA Conventions (Vite)\n\n- React Router pour la navigation : createBrowserRouter avec lazy loading\n- State management : Zustand ou Jotai pour l'état global, React Query pour le server state\n- Fichiers de feature groupés : features/<name>/ avec components/, hooks/, api/\n- Custom hooks pour la logique réutilisable : use<Name> dans hooks/\n- Formulaires avec React Hook Form + Zod pour la validation\n- Barrel exports (index.ts) par feature pour les imports propres\n- Variables d'environnement via import.meta.env (préfixe VITE_)\n- Vite config : alias de chemins (@/), proxy API en dev"
+        }
+      }
     },
     "vue": {
-      "claude_md_append": "\n## Framework: Vue 3\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Composition API par défaut\n- Pinia pour le state management\n- Vue Router pour le routing"
+      "claude_md_append": "\n## Framework: Vue 3\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Composition API par défaut\n- Pinia pour le state management\n- Vue Router pour le routing",
+      "rules": {
+        "vue-patterns": {
+          "applies_to": ["**/*.vue", "**/*.ts"],
+          "content": "## Vue 3 Conventions\n\n- Composition API exclusivement avec <script setup lang=\"ts\">\n- Pinia pour le state management : defineStore avec setup syntax\n- Vue Router : createRouter avec lazy loading (defineAsyncComponent ou import())\n- Composables (use<Name>) dans composables/ pour la logique réutilisable\n- Props typées avec defineProps<{}>(), émissions avec defineEmits<{}>()\n- v-model personnalisé avec defineModel() (Vue 3.4+)\n- Provide/inject pour la dépendance injection dans l'arbre de composants\n- Auto-import des composants et composables avec unplugin-auto-import\n- VueUse pour les composables utilitaires courants"
+        }
+      }
     },
     "svelte": {
       "claude_md_append": "\n## Framework: SvelteKit\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Conventions SvelteKit :\n  - Routing basé sur le système de fichiers dans routes/\n  - +page.svelte pour les pages\n  - +layout.svelte pour les layouts\n  - +server.ts pour les routes API\n  - Fonctions load pour le chargement de données",
