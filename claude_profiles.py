@@ -492,9 +492,74 @@ def cmd_list(args):
             print(f"  {styled(name, Colors.RED):30s} (erreur de chargement)")
     print()
 
+    # Lister les overlays
+    overlay_list = list_overlays()
+    if overlay_list:
+        print(styled("Overlays disponibles :\n", Colors.BOLD))
+        for name in overlay_list:
+            try:
+                overlay = load_overlay(name)
+                display = overlay.get("display_name", name)
+                desc = overlay.get("description", "")
+                compat = overlay.get("compatible_profiles", [])
+                compat_str = ""
+                if compat:
+                    compat_str = styled(f"  pour: {', '.join(compat)}", Colors.DIM)
+                print(f"  {styled('+' + name, Colors.MAGENTA):30s} {display} — {desc}")
+                if compat_str:
+                    print(f"  {' ' * 30} {compat_str}")
+            except Exception:
+                print(f"  {styled('+' + name, Colors.RED):30s} (erreur de chargement)")
+        print()
+
 
 def cmd_show(args):
-    """Commande: afficher le détail d'un profil."""
+    """Commande: afficher le détail d'un profil ou overlay."""
+    if args.profile.startswith("+"):
+        overlay_name = args.profile.lstrip("+")
+        overlay = load_overlay(overlay_name)
+        display = overlay.get("display_name", overlay_name)
+        desc = overlay.get("description", "")
+        compat = overlay.get("compatible_profiles", [])
+
+        print(styled(f"\n{'=' * 60}", Colors.BLUE))
+        print(styled(f"  Overlay : {display}", Colors.BOLD, Colors.MAGENTA))
+        print(styled(f"  {desc}", Colors.DIM))
+        if compat:
+            print(styled(f"  Compatible avec : {', '.join(compat)}", Colors.DIM))
+        print(styled(f"{'=' * 60}\n", Colors.BLUE))
+
+        mcps = overlay.get("mcp_servers", {})
+        if mcps:
+            print(styled("  MCP Servers :", Colors.BOLD))
+            for name, config in mcps.items():
+                stype = config.get("type", "stdio")
+                print(f"    {styled(name, Colors.GREEN):25s} ({stype})")
+            print()
+
+        rules = overlay.get("rules", {})
+        if rules:
+            print(styled("  Rules :", Colors.BOLD))
+            for rname in rules:
+                print(f"    {styled(rname + '.md', Colors.GREEN)}")
+            print()
+
+        skills = overlay.get("skills", {})
+        if skills:
+            print(styled("  Skills :", Colors.BOLD))
+            for sname in skills:
+                print(f"    {styled('/' + sname, Colors.GREEN)}")
+            print()
+
+        if overlay.get("claude_md"):
+            print(styled("  CLAUDE.md (append) :", Colors.BOLD))
+            preview = overlay["claude_md"][:200]
+            if len(overlay["claude_md"]) > 200:
+                preview += "..."
+            print(f"    {styled(preview, Colors.DIM)}")
+            print()
+        return
+
     profile = load_profile(args.profile)
     display = profile.get("display_name", args.profile)
     desc = profile.get("description", "")
@@ -589,6 +654,16 @@ def cmd_init(args):
         shutil.copy2(profile_file, dest)
         print(styled(f"  + {profile_file.name}", Colors.GREEN))
 
+    # Copier les overlays built-in
+    builtin_overlays = BUILTIN_OVERLAYS_DIR
+    if builtin_overlays.exists():
+        dest_overlays = PROFILES_DIR / "overlays"
+        dest_overlays.mkdir(parents=True, exist_ok=True)
+        for overlay_file in builtin_overlays.glob("*.json"):
+            dest = dest_overlays / overlay_file.name
+            shutil.copy2(overlay_file, dest)
+            print(styled(f"  + overlays/{overlay_file.name}", Colors.GREEN))
+
     print(styled(f"\nProfils initialisés dans {PROFILES_DIR}", Colors.BOLD, Colors.GREEN))
     print(styled(f"Tu peux les personnaliser en éditant les fichiers JSON.\n", Colors.DIM))
 
@@ -618,6 +693,25 @@ def cmd_diff(args):
             profile_name = detected[0][0]
 
     profile = load_profile(profile_name)
+
+    # Charger les overlays si présents dans .applied-profile
+    applied_overlays = []
+    if applied and applied.get("overlays"):
+        applied_overlays = applied["overlays"]
+        print(styled(f"  Overlays : {', '.join(applied_overlays)}", Colors.CYAN))
+
+    # Fusionner les overlays dans le profil pour comparaison
+    for overlay_name in applied_overlays:
+        try:
+            overlay = load_overlay(overlay_name)
+            if overlay.get("mcp_servers"):
+                profile.setdefault("mcp_servers", {}).update(overlay["mcp_servers"])
+            if overlay.get("rules"):
+                profile.setdefault("rules", {}).update(overlay["rules"])
+            if overlay.get("skills"):
+                profile.setdefault("skills", {}).update(overlay["skills"])
+        except SystemExit:
+            print(styled(f"  ⚠ Overlay '{overlay_name}' introuvable, ignoré pour le diff", Colors.YELLOW))
 
     print(styled(f"\nComparaison avec le profil '{profile_name}' :\n", Colors.BOLD))
 
