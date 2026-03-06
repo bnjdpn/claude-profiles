@@ -1,0 +1,15 @@
+{
+  "display_name": "HealthKit",
+  "description": "Support HealthKit pour les apps santé/fitness iOS",
+  "compatible_profiles": ["ios-swift"],
+
+  "claude_md": "## HealthKit\n- Framework : HealthKit (import HealthKit)\n- Toujours vérifier `HKHealthStore.isHealthDataAvailable()` avant tout accès\n- Demander les autorisations avec `requestAuthorization(toShare:read:)`\n- Les données HealthKit sont sensibles : ne jamais les logger ni les envoyer sans consentement\n- Utiliser `HKStatisticsQuery` pour les agrégats, `HKSampleQuery` pour les données brutes\n- Background delivery : `enableBackgroundDelivery(for:frequency:)` pour les mises à jour en arrière-plan",
+
+  "rules": {
+    "healthkit-privacy": "---\npaths:\n  - \"**/*.swift\"\n---\n# HealthKit Privacy & Autorisations\n- Toujours inclure NSHealthShareUsageDescription et NSHealthUpdateUsageDescription dans Info.plist\n- Vérifier `authorizationStatus(for:)` avant chaque lecture/écriture\n- Ne jamais stocker de données HealthKit dans UserDefaults ou fichiers non chiffrés\n- Utiliser le Keychain ou Core Data avec protection `completeUntilFirstUserAuthentication`\n- Les données HealthKit ne doivent JAMAIS quitter l'appareil sans consentement explicite de l'utilisateur\n- Gérer gracieusement le cas où l'utilisateur refuse les autorisations"
+  },
+
+  "skills": {
+    "healthkit-setup": "---\nname: healthkit-setup\ndescription: Configurer HealthKit dans un projet iOS existant\n---\n\nConfigurer HealthKit pour le projet :\n\n1. Activer la capability HealthKit dans le target (Signing & Capabilities)\n2. Ajouter les clés Info.plist :\n   - `NSHealthShareUsageDescription` : expliquer pourquoi l'app lit les données santé\n   - `NSHealthUpdateUsageDescription` : expliquer pourquoi l'app écrit des données santé\n3. Créer `Services/HealthKitService.swift` :\n   - Singleton avec `HKHealthStore`\n   - Méthode `requestAuthorization(types:completion:)` qui demande les types nécessaires\n   - Méthodes de lecture par type (pas, fréquence cardiaque, sommeil, etc.)\n   - Méthodes d'écriture pour enregistrer des samples\n4. Créer `Models/HealthData.swift` : types locaux mappant les `HKQuantityType`\n5. Ajouter un test unitaire vérifiant que le service gère le cas `isHealthDataAvailable() == false`"
+  }
+}
