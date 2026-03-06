@@ -4,17 +4,12 @@
   "detect_markers": ["build.gradle.kts", "app/build.gradle.kts", "settings.gradle.kts"],
 
   "mcp_servers": {
-    "jetbrains": {
+    "github": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@jetbrains/mcp-proxy"],
-      "_comment": "Intégration Android Studio / IntelliJ"
-    },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "context7": {
@@ -22,14 +17,6 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "_comment": "Documentation temps réel Jetpack, Compose, etc."
-    },
-    "figma": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@anthropic/mcp-server-figma"],
-      "env": {
-        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
-      }
     }
   },
 

@@ -33,16 +33,16 @@
 | Profile | Variants |
 |---------|----------|
 | Python | Django, FastAPI, Flask, Data Science |
-| TypeScript / React | Next.js, React, Vue, Svelte |
-| TypeScript / Node | Next.js, API (Express/Fastify/Koa) |
-| JavaScript / Node | — |
-| Java | Maven, Gradle |
-| Go | — |
-| Rust | — |
+| TypeScript / React | Next.js, React, Vue |
+| TypeScript / Node | NestJS, Express, Fastify |
+| JavaScript / Node | Express, API, Next.js |
+| Java | Maven, Gradle, Spring Boot, Quarkus |
+| Go | Gin, Echo, CLI |
+| Rust | Axum, Actix, CLI |
 | iOS / Swift | SwiftUI, UIKit, SPM, CocoaPods, HealthKit, Widgets, Multiplatform |
-| Flutter / Dart | — |
-| Android | — |
-| C / C++ | — |
+| Flutter / Dart | Riverpod, BLoC, GetX |
+| Android | Compose, XML Views |
+| C / C++ | CMake, Make |
 
 ## Quick Start
 
@@ -90,9 +90,10 @@ your-project/
 {
   "mcpServers": {
     "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": { "Authorization": "Bearer ${GITHUB_TOKEN}" }
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
     },
     "context7": {
       "type": "stdio",
@@ -162,9 +163,10 @@ your-project/
       "args": ["-y", "xcodebuildmcp@latest"]
     },
     "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": { "Authorization": "Bearer ${GITHUB_TOKEN}" }
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
     },
     "context7": {
       "type": "stdio",

@@ -4,17 +4,12 @@
   "detect_markers": ["pom.xml", "build.gradle", "build.gradle.kts"],
 
   "mcp_servers": {
-    "jetbrains": {
+    "github": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@anthropic/mcp-server-java"],
-      "_comment": "Intégration JetBrains IDE (IntelliJ IDEA, etc.)"
-    },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "context7": {
@@ -28,14 +23,6 @@
   "variants": {
     "maven": {
       "claude_md_append": "\n## Build System: Maven\n- Build: `mvn clean install`\n- Tests: `mvn test`\n- Tests d'intégration: `mvn verify`\n- Exécution: `mvn spring-boot:run`\n- Dependency tree: `mvn dependency:tree`\n- Formattage: `mvn spotless:apply`",
-      "mcp_servers": {
-        "maven-tools": {
-          "type": "stdio",
-          "command": "npx",
-          "args": ["-y", "@anthropic/mcp-server-maven"],
-          "_comment": "Recherche de dépendances Maven Central, versions, résolution d'artefacts"
-        }
-      },
       "settings_merge": {
         "permissions": {
           "allow": [
@@ -47,15 +34,7 @@
     },
     "gradle": {
       "claude_md_append": "\n## Build System: Gradle\n- Build: `./gradlew build`\n- Tests: `./gradlew test`\n- Exécution: `./gradlew bootRun`\n- Dependency tree: `./gradlew dependencies`\n- Clean: `./gradlew clean`",
-      "mcp_servers": {
-        "gradle": {
-          "type": "stdio",
-          "command": "npx",
-          "args": ["-y", "@anthropic/mcp-server-gradle"],
-          "_comment": "Gradle Tooling API : inspect projects, execute tasks, test reporting"
-        }
-      },
-      "exclude_mcps": ["maven-tools"],
+      "exclude_mcps": [],
       "settings_merge": {
         "permissions": {
           "allow": [

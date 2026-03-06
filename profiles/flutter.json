@@ -4,32 +4,19 @@
   "detect_markers": ["pubspec.yaml"],
 
   "mcp_servers": {
-    "flutter": {
+    "github": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@anthropic/mcp-server-flutter"],
-      "_comment": "Documentation Flutter/Dart temps réel + pub.dev packages"
-    },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "context7": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "figma-flutter": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "figma-flutter-mcp@latest"],
-      "env": {
-        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
-      },
-      "_comment": "Figma → Flutter widget conversion directe"
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel Flutter, Dart, pub.dev"
     }
   },
 
