@@ -255,6 +255,95 @@ def detect_variant(profile_name: str, directory: str = ".") -> Optional[str]:
 
     return None
 
+# ─── Résolution d'un profil ──────────────────────────────────────────────────
+
+def resolve_profile(profile_name: str, variant: Optional[str] = None,
+                    directory: str = ".", overlays: Optional[list[str]] = None) -> dict:
+    """Charge un profil, résout la variante et fusionne les overlays.
+
+    Retourne le profil fusionné complet (base + variante + overlays).
+    """
+    profile = load_profile(profile_name)
+
+    if variant is None:
+        variant = detect_variant(profile_name, directory)
+    if overlays is None:
+        overlays = []
+
+    # Charger et valider les overlays
+    loaded_overlays: list[tuple[str, dict]] = []
+    for overlay_name in overlays:
+        overlay = load_overlay(overlay_name)
+        compatible = overlay.get("compatible_profiles", [])
+        if compatible and profile_name not in compatible:
+            print(styled(
+                f"  ⚠ overlay '{overlay_name}' est prévu pour {', '.join(compatible)}, "
+                f"appliqué sur {profile_name}",
+                Colors.YELLOW
+            ))
+        loaded_overlays.append((overlay_name, overlay))
+
+    # Fusionner variante
+    variant_config = {}
+    if variant and "variants" in profile:
+        variant_config = profile["variants"].get(variant, {})
+
+    # MCP servers
+    mcp_servers = {**profile.get("mcp_servers", {})}
+    if variant_config.get("mcp_servers"):
+        mcp_servers.update(variant_config["mcp_servers"])
+    for excluded in variant_config.get("exclude_mcps", []):
+        mcp_servers.pop(excluded, None)
+    for _, overlay in loaded_overlays:
+        if overlay.get("mcp_servers"):
+            mcp_servers.update(overlay["mcp_servers"])
+
+    # CLAUDE.md
+    claude_md = profile.get("claude_md", "")
+    if variant_config.get("claude_md_append"):
+        claude_md += "\n\n" + variant_config["claude_md_append"]
+    for _, overlay in loaded_overlays:
+        if overlay.get("claude_md"):
+            claude_md += "\n\n---\n\n" + overlay["claude_md"]
+
+    # Rules
+    rules = {**profile.get("rules", {})}
+    if variant_config.get("rules"):
+        rules.update(variant_config["rules"])
+    for _, overlay in loaded_overlays:
+        if overlay.get("rules"):
+            rules.update(overlay["rules"])
+
+    # Skills
+    skills = {**profile.get("skills", {})}
+    if variant_config.get("skills"):
+        skills.update(variant_config["skills"])
+    for _, overlay in loaded_overlays:
+        if overlay.get("skills"):
+            skills.update(overlay["skills"])
+
+    # Settings
+    settings = profile.get("settings", {})
+    if variant_config.get("settings_merge"):
+        for key, val in variant_config["settings_merge"].items():
+            if isinstance(val, dict) and isinstance(settings.get(key), dict):
+                settings[key] = {**settings[key], **val}
+            else:
+                settings[key] = val
+    for _, overlay in loaded_overlays:
+        if overlay.get("settings"):
+            settings = deep_merge(settings, overlay["settings"])
+
+    return {
+        "mcp_servers": mcp_servers,
+        "claude_md": claude_md,
+        "rules": rules,
+        "skills": skills,
+        "settings": settings,
+        "display_name": profile.get("display_name", profile_name),
+        "variant": variant,
+    }
+
 # ─── Application d'un profil ─────────────────────────────────────────────────
 
 def apply_profile(profile_name: str, variant: Optional[str] = None, directory: str = ".",
