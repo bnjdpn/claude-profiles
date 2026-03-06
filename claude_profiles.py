@@ -344,6 +344,35 @@ def resolve_profile(profile_name: str, variant: Optional[str] = None,
         "variant": variant,
     }
 
+# ─── Génération de la map de fichiers ────────────────────────────────────────
+
+def generate_file_map(resolved: dict) -> dict[str, str]:
+    """Génère la map {chemin_relatif: contenu} des fichiers à écrire."""
+    files = {}
+
+    # .mcp.json
+    if resolved["mcp_servers"]:
+        mcp_json = {"mcpServers": resolved["mcp_servers"]}
+        files[".mcp.json"] = json.dumps(mcp_json, indent=2) + "\n"
+
+    # .claude/CLAUDE.md
+    if resolved["claude_md"]:
+        files[".claude/CLAUDE.md"] = resolved["claude_md"] + "\n"
+
+    # .claude/rules/*.md
+    for rule_name, rule_content in resolved["rules"].items():
+        files[f".claude/rules/{rule_name}.md"] = rule_content + "\n"
+
+    # .claude/skills/*/SKILL.md
+    for skill_name, skill_content in resolved["skills"].items():
+        files[f".claude/skills/{skill_name}/SKILL.md"] = skill_content + "\n"
+
+    # .claude/settings.json
+    if resolved["settings"]:
+        files[".claude/settings.json"] = json.dumps(resolved["settings"], indent=2) + "\n"
+
+    return files
+
 # ─── Application d'un profil ─────────────────────────────────────────────────
 
 def apply_profile(profile_name: str, variant: Optional[str] = None, directory: str = ".",
