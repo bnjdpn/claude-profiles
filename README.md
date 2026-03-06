@@ -76,9 +76,15 @@ Quand tu appliques un profil, `claude-profiles` crée dans ton projet :
 
 Les profils sont des fichiers JSON dans `~/.claude-profiles/`. Tu peux les modifier ou en créer de nouveaux.
 
-Après application d'un profil, tu peux ajouter des overrides locaux (non versionnés) :
-- `.claude/CLAUDE.local.md` — instructions supplémentaires
-- `.claude/settings.local.json` — settings locaux
+### Instructions locales (`.claude/CLAUDE.local.md`)
+
+À l'application d'un profil, un fichier `.claude/CLAUDE.local.md` est créé automatiquement s'il n'existe pas. C'est l'endroit pour ajouter des instructions spécifiques au projet — il est inclus via `@CLAUDE.local.md` à la fin du `CLAUDE.md` généré et n'est jamais écrasé par un `apply` ou `sync`.
+
+Ce fichier est ignoré par git (ajouté au `.gitignore`), donc chaque développeur peut y mettre ses propres instructions.
+
+### Autres overrides locaux
+
+- `.claude/settings.local.json` — settings locaux (non versionnés)
 
 ## Zéro dépendance
 

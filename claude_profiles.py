@@ -358,7 +358,9 @@ def generate_file_map(resolved: dict) -> dict[str, str]:
 
     # .claude/CLAUDE.md
     if resolved["claude_md"]:
-        files[".claude/CLAUDE.md"] = resolved["claude_md"] + "\n"
+        claude_md = resolved["claude_md"]
+        claude_md += "\n\n<!-- Local overrides - edit this section or create .claude/CLAUDE.local.md -->\n@CLAUDE.local.md"
+        files[".claude/CLAUDE.md"] = claude_md + "\n"
 
     # .claude/rules/*.md
     for rule_name, rule_content in resolved["rules"].items():
@@ -433,6 +435,19 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
                 print(styled(f"      - {name}", Colors.DIM))
         else:
             print(styled(f"  + {rel_path}", Colors.GREEN))
+
+    # Créer CLAUDE.local.md si inexistant
+    local_md_path = path / ".claude" / "CLAUDE.local.md"
+    if not local_md_path.exists():
+        if not dry_run:
+            local_md_path.parent.mkdir(parents=True, exist_ok=True)
+            local_md_path.write_text(
+                "<!-- Instructions locales pour ce projet (non versionné) -->\n"
+                "<!-- Ce fichier est automatiquement inclus par .claude/CLAUDE.md via @CLAUDE.local.md -->\n"
+            )
+        print(styled(f"  + .claude/CLAUDE.local.md (nouveau)", Colors.GREEN))
+    else:
+        print(styled(f"  ~ .claude/CLAUDE.local.md conservé (existant)", Colors.DIM))
 
     # Écrire .applied-profile
     if not dry_run and generated_files:
