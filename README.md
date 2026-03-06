@@ -33,13 +33,18 @@
 | Profile | Variants |
 |---------|----------|
 | Python | Django, FastAPI, Flask, Data Science |
-| TypeScript / React | Next.js, React, Vue |
+| TypeScript / React | Next.js, React, Vue, Svelte |
 | TypeScript / Node | NestJS, Express, Fastify |
 | JavaScript / Node | Express, API, Next.js |
+| Ruby | Rails, Sinatra, CLI |
+| PHP | Laravel, Symfony, WordPress |
 | Java | Maven, Gradle, Spring Boot, Quarkus |
+| C# / .NET | ASP.NET, Blazor, MAUI, Console |
 | Go | Gin, Echo, CLI |
 | Rust | Axum, Actix, CLI |
+| Elixir | Phoenix, LiveView, CLI |
 | iOS / Swift | SwiftUI, UIKit, SPM, CocoaPods, HealthKit, Widgets, Multiplatform |
+| Kotlin Multiplatform | Compose Multiplatform, Shared Logic |
 | Flutter / Dart | Riverpod, BLoC, GetX |
 | Android | Compose, XML Views |
 | C / C++ | CMake, Make |

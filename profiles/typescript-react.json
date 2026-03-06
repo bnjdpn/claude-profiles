@@ -33,6 +33,12 @@
     },
     "vue": {
       "claude_md_append": "\n## Framework: Vue 3\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Composition API par défaut\n- Pinia pour le state management\n- Vue Router pour le routing"
+    },
+    "svelte": {
+      "claude_md_append": "\n## Framework: SvelteKit\n- Dev: `npm run dev`\n- Build: `npm run build`\n- Conventions SvelteKit :\n  - Routing basé sur le système de fichiers dans routes/\n  - +page.svelte pour les pages\n  - +layout.svelte pour les layouts\n  - +server.ts pour les routes API\n  - Fonctions load pour le chargement de données",
+      "rules": {
+        "svelte": "---\npaths:\n  - \"**/*.svelte\"\n  - \"**/*.ts\"\n---\n# Conventions Svelte / SvelteKit\n- Utiliser les runes Svelte 5 : $state, $derived, $effect\n- Props de composant via $props()\n- Utiliser snippet pour le markup réutilisable\n- Conventions SvelteKit :\n  - Fonctions load pour le chargement de données côté serveur et client\n  - Form actions pour les mutations de données\n  - Enhancement progressif par défaut (use:enhance sur les formulaires)"
+      }
     }
   },
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project does
 
-`claude-profiles` is a CLI tool that manages Claude Code configuration profiles per technology stack. It auto-detects project types (Python, TypeScript, Go, Rust, Java, iOS/Swift, Flutter, Android, C++) and generates the corresponding `.claude/` directory structure with CLAUDE.md, rules, skills, settings, and `.mcp.json`.
+`claude-profiles` is a CLI tool that manages Claude Code configuration profiles per technology stack. It auto-detects project types (Python, TypeScript, Go, Rust, Java, Ruby, PHP, C#/.NET, Elixir, iOS/Swift, Kotlin Multiplatform, Flutter, Android, C++) and generates the corresponding `.claude/` directory structure with CLAUDE.md, rules, skills, settings, and `.mcp.json`.
 
 ## Running the tool
 
@@ -31,7 +31,7 @@ There are no tests or linting configured for this project itself. The codebase i
 
 ## Architecture
 
-**Single-file CLI** (`claude_profiles.py`, ~1025 lines): everything lives in one file using only stdlib (`argparse`, `json`, `pathlib`, `shutil`).
+**Single-file CLI** (`claude_profiles.py`, ~1080 lines): everything lives in one file using only stdlib (`argparse`, `json`, `pathlib`, `shutil`).
 
 **Profile format** (`profiles/*.json`): each JSON file defines a complete Claude Code configuration:
 - `mcp_servers` → generates `.mcp.json`

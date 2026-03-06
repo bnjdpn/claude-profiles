@@ -1,0 +1,62 @@
+{
+  "display_name": "Kotlin Multiplatform",
+  "description": "Développement Kotlin Multiplatform (KMP) — Android, iOS, Desktop, Web",
+  "detect_markers": ["shared/build.gradle.kts", "composeApp/build.gradle.kts"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel Kotlin, Compose Multiplatform, Ktor"
+    }
+  },
+
+  "variants": {
+    "compose-multiplatform": {
+      "claude_md_append": "\n## UI : Compose Multiplatform\n- UI partagée dans `composeApp/` via Compose Multiplatform\n- Utiliser `expect`/`actual` pour les composants spécifiques à chaque plateforme\n- Material 3 pour le design system\n- Navigation partagée (Voyager, Decompose ou Navigation Compose)\n- Prévisualiser les Composables avec `@Preview` quand possible"
+    },
+    "shared-logic": {
+      "claude_md_append": "\n## Approche : Logique partagée uniquement\n- Logique métier dans `shared/` (commonMain)\n- UI native par plateforme : `androidApp/` (Jetpack Compose ou XML), `iosApp/` (SwiftUI ou UIKit)\n- Le module `shared` expose des interfaces claires consommées par chaque plateforme\n- Pas de dépendance UI dans le module partagé"
+    }
+  },
+
+  "claude_md": "# Projet Kotlin Multiplatform (KMP)\n\n## Stack\n- Langage : Kotlin 2.0+\n- Build : Gradle (Kotlin DSL)\n- Cibles : Android, iOS, Desktop, Web\n\n## Commandes\n- Build complet : `./gradlew build`\n- Tests du module partagé : `./gradlew :shared:test`\n- Lancer l'app Compose : `./gradlew :composeApp:run`\n- Clean : `./gradlew clean`\n\n## Conventions\n- Déclarations `expect`/`actual` pour le code spécifique à chaque plateforme\n- Ktor pour le réseau (client HTTP multiplateforme)\n- Koin ou Kodein pour l'injection de dépendances\n- kotlinx.serialization pour la sérialisation JSON\n- kotlinx.coroutines pour l'asynchrone et la concurrence\n- Minimiser le code spécifique à chaque plateforme : privilégier commonMain\n- Source sets : commonMain, androidMain, iosMain, desktopMain, wasmJsMain",
+
+  "rules": {
+    "kmp-conventions": "---\npaths:\n  - \"**/*.kt\"\n  - \"**/*.kts\"\n---\n# Conventions Kotlin Multiplatform\n- Utiliser le pattern `expect`/`actual` pour les implémentations spécifiques à chaque plateforme\n- Source sets : `commonMain`, `androidMain`, `iosMain`, `desktopMain`, `wasmJsMain`\n- Minimiser le code spécifique : garder un maximum de logique dans `commonMain`\n- Utiliser des interfaces pour abstraire les dépendances plateforme\n- Privilégier les bibliothèques kotlinx multiplateforme (coroutines, serialization, datetime, io)\n- Kotlin coding conventions officielles (nommage, formatage)\n- `data class` pour les modèles, `sealed class`/`interface` pour les états\n- Pas d'import Java dans `commonMain` — uniquement des API Kotlin/kotlinx",
+    "testing": "---\npaths:\n  - \"**/commonTest/**/*.kt\"\n  - \"**/androidTest/**/*.kt\"\n  - \"**/iosTest/**/*.kt\"\n---\n# Conventions de Tests KMP\n- `kotlin.test` dans `commonTest` pour les tests multiplateforme\n- Tests spécifiques plateforme dans `androidTest` et `iosTest`\n- Kotest pour les assertions avancées et les matchers\n- Tester la logique métier dans `commonTest` en priorité\n- Utiliser `runTest` de kotlinx.coroutines pour les tests asynchrones"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Build et test le projet Kotlin Multiplatform\n---\n\n1. Tests du module partagé (toutes plateformes) : `./gradlew :shared:allTests`\n2. Build complet : `./gradlew build`\n3. Vérifier les résultats des tests : shared/build/reports/tests/",
+    "create-shared-module": "---\nname: create-shared-module\ndescription: Créer un module partagé KMP avec le pattern expect/actual\n---\n\n1. Créer la structure du module dans `shared/src/`\n2. Définir les déclarations `expect` dans `commonMain/kotlin/`\n3. Implémenter les déclarations `actual` dans `androidMain/kotlin/` et `iosMain/kotlin/`\n4. Ajouter les tests dans `commonTest/kotlin/`\n5. Configurer le `build.gradle.kts` du module avec les cibles appropriées"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(./gradlew *)",
+        "Bash(gradle *)",
+        "Bash(kotlin *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

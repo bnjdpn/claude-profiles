@@ -1,0 +1,69 @@
+{
+  "display_name": "C# / .NET",
+  "description": "Développement C# avec .NET (ASP.NET, Blazor, MAUI, console)",
+  "detect_markers": ["*.csproj", "*.sln", "Program.cs"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel .NET et NuGet packages"
+    }
+  },
+
+  "variants": {
+    "aspnet": {
+      "claude_md_append": "\n## Framework: ASP.NET Core\n- Dev: `dotnet run` ou `dotnet watch run` (hot reload)\n- Swagger UI: http://localhost:5000/swagger (en développement)\n- Tests: `dotnet test`\n- Migrations EF Core: `dotnet ef migrations add <Nom> && dotnet ef database update`\n\n### Conventions ASP.NET\n- Préférer les Minimal APIs pour les endpoints simples, Controllers pour les cas complexes\n- Pipeline de middleware : ordre explicite (UseRouting → UseAuthentication → UseAuthorization → MapControllers)\n- Injection de dépendances : enregistrer les services dans Program.cs (AddScoped/AddTransient/AddSingleton)\n- Entity Framework Core : DbContext avec Fluent API, migrations versionnées\n- DTOs avec AutoMapper ou Mapster pour le mapping entité ↔ réponse API\n- Validation avec FluentValidation ou DataAnnotations",
+      "rules": {
+        "aspnet": "---\npaths:\n  - \"**/*.cs\"\n---\n# Conventions ASP.NET Core\n- Minimal APIs pour les endpoints simples, Controllers pour les domaines complexes\n- Pipeline de middleware dans l'ordre correct\n- Injection de dépendances systématique (jamais de new sur les services)\n- Entity Framework Core : Fluent API > DataAnnotations pour la config\n- DTOs séparés des entités (AutoMapper ou Mapster)\n- Validation avec FluentValidation\n- Réponses typées : IResult (Minimal API) ou ActionResult<T> (Controllers)"
+      }
+    },
+    "blazor": {
+      "claude_md_append": "\n## Framework: Blazor\n- Blazor Server : `dotnet run` (connexion SignalR temps réel)\n- Blazor WebAssembly : `dotnet run` (exécution côté client)\n- Hot reload : `dotnet watch run`\n\n### Conventions Blazor\n- Cycle de vie des composants : OnInitializedAsync, OnParametersSetAsync, OnAfterRenderAsync\n- Syntaxe Razor : @code, @inject, @bind, @onclick\n- Gestion d'état : CascadingValue, services Scoped, Fluxor pour les apps complexes\n- Composants réutilisables avec [Parameter] et EventCallback\n- Rendu interactif : choisir Server vs WASM vs Auto selon le cas d'usage"
+    },
+    "maui": {
+      "claude_md_append": "\n## Framework: .NET MAUI\n- Dev: `dotnet build -t:Run -f net8.0-android` ou `-f net8.0-ios`\n- Hot reload : activé par défaut dans Visual Studio / `dotnet watch`\n\n### Conventions MAUI\n- Architecture MVVM avec CommunityToolkit.Mvvm ([ObservableProperty], [RelayCommand])\n- UI cross-plateforme : XAML ou C# Markup\n- Code spécifique plateforme dans Platforms/ avec #if directives ou partial classes\n- Injection de dépendances via MauiProgram.cs\n- Handlers pour la personnalisation des contrôles natifs\n- Shell pour la navigation (routes enregistrées)"
+    },
+    "console": {
+      "claude_md_append": "\n## Application Console\n- Exécution : `dotnet run` ou `dotnet run -- <arguments>`\n- Publication : `dotnet publish -c Release`\n\n### Conventions Console\n- System.CommandLine pour le parsing d'arguments et sous-commandes\n- Host builder pattern (Microsoft.Extensions.Hosting) pour les services et la config\n- IConfiguration pour la gestion de configuration (appsettings.json, variables d'env)\n- Logging structuré avec Microsoft.Extensions.Logging\n- Annulation propre avec CancellationToken et Console.CancelKeyPress"
+    }
+  },
+
+  "claude_md": "# Projet C# / .NET\n\n## Stack\n- Langage: C# 12+\n- Runtime: .NET 8+\n- Gestionnaire de paquets: NuGet\n\n## Commandes\n- Build: `dotnet build`\n- Tests: `dotnet test`\n- Exécution: `dotnet run`\n- Formatage: `dotnet format`\n- Restauration: `dotnet restore`\n- Publication: `dotnet publish -c Release`\n\n## Conventions\n- Nullable reference types activés (`<Nullable>enable</Nullable>`)\n- File-scoped namespaces (`namespace MonProjet;`)\n- Primary constructors pour l'injection de dépendances\n- Pattern matching (switch expressions, is patterns)\n- Global usings dans GlobalUsings.cs\n- Analyseurs Roslyn activés (EnforceCodeStyleInBuild)",
+
+  "rules": {
+    "csharp-conventions": "---\npaths:\n  - \"**/*.cs\"\n---\n# Conventions C#\n- PascalCase pour les membres publics (propriétés, méthodes, classes)\n- camelCase avec préfixe _ pour les champs privés (_monChamp)\n- async/await systématique (jamais .Result ou .Wait())\n- IDisposable et IAsyncDisposable : implémenter le pattern correctement, utiliser using/await using\n- Record types pour les DTOs et objets valeur immuables\n- Classes sealed par défaut (désceller uniquement si l'héritage est prévu)\n- Expression-bodied members pour les méthodes courtes\n- Nullable reference types : pas de null non vérifié, utiliser le pattern guard (ArgumentNullException.ThrowIfNull)\n- Préférer les collections immuables (IReadOnlyList<T>, IReadOnlyDictionary<K,V>)\n- Interfaces préfixées par I (IMonService)",
+    "testing": "---\npaths:\n  - \"**/*Tests.cs\"\n  - \"**/*Test.cs\"\n  - \"**/Tests/**/*.cs\"\n  - \"**/*.Tests/**/*.cs\"\n---\n# Conventions de Tests C#\n- xUnit comme framework de test\n- [Fact] pour les tests unitaires simples\n- [Theory] + [InlineData] pour les tests paramétrés\n- IClassFixture<T> pour le partage de contexte entre tests\n- FluentAssertions pour les assertions lisibles (.Should().Be(), .Should().Contain())\n- NSubstitute ou Moq pour les mocks et stubs\n- Pattern Arrange-Act-Assert (AAA) dans chaque test\n- Nommage: MethodeTestee_Scenario_ResultatAttendu\n- Un projet de test par projet source (MonProjet.Tests)\n- Pas de dépendance à l'ordre d'exécution des tests"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Vérifie le formatage, compile et lance les tests .NET\n---\n\n1. Vérifier le formatage : `dotnet format --verify-no-changes`\n2. Compiler : `dotnet build --no-restore -warnaserror`\n3. Tests : `dotnet test --no-build -v normal`",
+    "create-service": "---\nname: create-service\ndescription: Créer un service C# avec interface et enregistrement DI\n---\n\nCréer le service `$ARGUMENTS` :\n\n1. Créer l'interface `I$ARGUMENTS.cs` dans le dossier Services/\n   - Définir les méthodes du contrat avec types de retour Task<T>\n2. Créer l'implémentation `$ARGUMENTS.cs` dans Services/\n   - Implémenter I$ARGUMENTS\n   - Injecter les dépendances via primary constructor\n   - Classe sealed\n3. Enregistrer dans Program.cs : `builder.Services.AddScoped<I$ARGUMENTS, $ARGUMENTS>();`\n4. Créer `$ARGUMENTSTests.cs` dans le projet de tests\n   - Mock des dépendances avec NSubstitute\n   - Tests des cas nominaux et d'erreur"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(dotnet *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

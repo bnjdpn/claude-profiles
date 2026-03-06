@@ -1,0 +1,87 @@
+{
+  "display_name": "PHP",
+  "description": "Développement PHP (Laravel, Symfony, WordPress, APIs)",
+  "detect_markers": ["composer.json", "artisan", "*.php"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des packages PHP"
+    }
+  },
+
+  "variants": {
+    "laravel": {
+      "claude_md_append": "\n## Framework: Laravel\n- Dev: `php artisan serve`\n- Migrations: `php artisan migrate`\n- Console interactive: `php artisan tinker`\n- Génération de code: `php artisan make:model`, `php artisan make:controller`, `php artisan make:request`, `php artisan make:resource`, `php artisan make:policy`\n- File d'attente: `php artisan queue:work`\n- Cache: `php artisan cache:clear`, `php artisan config:clear`",
+      "mcp_servers": {
+        "postgres": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres"],
+          "env": {
+            "DATABASE_URL": "${DATABASE_URL:-postgres://localhost/laravel_dev}"
+          }
+        }
+      },
+      "rules": {
+        "laravel": "---\npaths:\n  - \"**/*.php\"\n---\n# Conventions Laravel\n- Utiliser les patterns Eloquent (scopes, accessors, mutators, relations)\n- Form Requests pour la validation (pas de validation dans les contrôleurs)\n- API Resources pour la sérialisation des réponses\n- Policies pour l'autorisation\n- Classes Service pour la logique métier complexe\n- Éviter les fat controllers : déléguer aux services, form requests et policies\n- Routes groupées par middleware et préfixe\n- Observers pour les side-effects sur les modèles\n- Events/Listeners pour le découplage"
+      }
+    },
+    "symfony": {
+      "claude_md_append": "\n## Framework: Symfony\n- Dev: `symfony serve`\n- Console: `php bin/console`\n- Migrations Doctrine: `php bin/console doctrine:migrations:migrate`\n- Générer une migration: `php bin/console doctrine:migrations:diff`\n- Vider le cache: `php bin/console cache:clear`\n- Debug routes: `php bin/console debug:router`\n- Debug services: `php bin/console debug:container`",
+      "rules": {
+        "symfony": "---\npaths:\n  - \"**/*.php\"\n---\n# Conventions Symfony\n- Services déclarés et injectés via le conteneur de dépendances\n- Injection de dépendances par constructeur (autowiring)\n- Entités Doctrine avec annotations/attributs PHP 8\n- Templates Twig pour le rendu HTML\n- Form types pour la gestion des formulaires\n- Voters pour l'autorisation\n- Event subscribers pour le découplage\n- Configuration YAML dans config/packages/"
+      }
+    },
+    "wordpress": {
+      "claude_md_append": "\n## CMS: WordPress\n- CLI: `wp` (WP-CLI)\n- Hooks: `add_action()`, `add_filter()`, `do_action()`, `apply_filters()`\n- Custom Post Types: `register_post_type()`\n- Taxonomies: `register_taxonomy()`\n- Admin: http://localhost/wp-admin/\n- Thème: `wp-content/themes/`\n- Plugins: `wp-content/plugins/`",
+      "rules": {
+        "wordpress": "---\npaths:\n  - \"**/*.php\"\n---\n# Conventions WordPress\n- Utiliser les hooks (actions et filtres) plutôt que modifier le core\n- Préfixer toutes les fonctions et constantes pour éviter les collisions\n- Custom Post Types et taxonomies pour structurer le contenu\n- WP_Query pour les requêtes personnalisées\n- Sanitization (sanitize_*) en entrée, escaping (esc_*) en sortie\n- Nonces pour la sécurité des formulaires\n- Suivre les standards de codage WordPress\n- Internationalisation avec __() et _e()"
+      }
+    }
+  },
+
+  "claude_md": "# Projet PHP\n\n## Stack\n- Langage: PHP 8.2+\n- Gestionnaire de paquets: Composer\n\n## Commandes\n- Dépendances: `composer install`\n- Serveur de dev: `php artisan serve` (Laravel) ou `php bin/console server:start` (Symfony)\n- Tests: `./vendor/bin/phpunit`\n- Lint/Format: `./vendor/bin/php-cs-fixer fix`\n- Analyse statique: `./vendor/bin/phpstan analyse`\n\n## Conventions\n- PSR-12 pour le style de code\n- PHPStan niveau 8 (strict)\n- Propriétés typées sur toutes les classes\n- declare(strict_types=1) dans chaque fichier\n- Utiliser les enums, les classes/propriétés readonly, match et les arguments nommés",
+
+  "rules": {
+    "php-conventions": "---\npaths:\n  - \"**/*.php\"\n---\n# Conventions PHP\n- declare(strict_types=1) en haut de chaque fichier\n- Type hints sur tous les paramètres, retours et propriétés\n- Classes et propriétés readonly quand c'est possible\n- Enums natifs PHP 8.1+ au lieu de constantes de classe\n- Expression match au lieu de switch quand applicable\n- Arguments nommés pour améliorer la lisibilité\n- Autoloading PSR-4 via Composer\n- Éviter le type mixed : typer explicitement\n- Retour never pour les fonctions qui ne retournent jamais\n- Union types et intersection types quand nécessaire\n- Promouvoir les propriétés dans le constructeur",
+    "testing": "---\npaths:\n  - \"**/Test*.php\"\n  - \"**/*Test.php\"\n  - \"tests/**/*.php\"\n---\n# Conventions de Tests PHP\n- PHPUnit comme framework principal (Pest comme alternative)\n- setUp() pour l'initialisation, tearDown() pour le nettoyage\n- Méthodes de test préfixées par test_ ou annotées @test\n- Data providers pour tester plusieurs jeux de données\n- Mocks avec createMock() ou getMockBuilder()\n- Assertions explicites : assertEquals, assertSame, assertTrue, assertInstanceOf\n- Annotation @covers pour lier les tests aux classes testées\n- Un fichier de test par classe testée\n- Nommage : test_should_comportement_when_condition"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Lance l'analyse statique, le linting et les tests PHP\n---\n\n1. Analyse statique : `./vendor/bin/phpstan analyse --memory-limit=512M`\n2. Vérification du style : `./vendor/bin/php-cs-fixer fix --dry-run --diff`\n3. Tests : `./vendor/bin/phpunit --testdox`",
+    "create-service": "---\nname: create-service\ndescription: Créer une classe Service PHP avec injection de dépendances\n---\n\nCréer le service `$ARGUMENTS` :\n\n1. Créer `src/Service/$ARGUMENTS.php` :\n   - declare(strict_types=1)\n   - Classe finale (final class) et readonly si possible\n   - Injection des dépendances par constructeur avec promotion de propriétés\n   - Type hints stricts sur toutes les méthodes\n2. Créer `tests/Service/${ARGUMENTS}Test.php` :\n   - Tests unitaires avec mocks des dépendances\n   - Annotation @covers\n   - Data providers si pertinent"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(php *)",
+        "Bash(composer *)",
+        "Bash(artisan *)",
+        "Bash(./vendor/bin/phpunit *)",
+        "Bash(./vendor/bin/phpstan *)",
+        "Bash(./vendor/bin/php-cs-fixer *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

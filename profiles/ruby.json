@@ -1,0 +1,81 @@
+{
+  "display_name": "Ruby",
+  "description": "Développement Ruby (Rails, Sinatra, CLI, gems)",
+  "detect_markers": ["Gemfile", "Rakefile", "*.gemspec"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel des gems Ruby"
+    }
+  },
+
+  "variants": {
+    "rails": {
+      "claude_md_append": "\n## Framework: Ruby on Rails\n- Serveur: `rails s` (par défaut sur http://localhost:3000)\n- Console: `rails c`\n- Migrations: `rails db:migrate`\n- Rollback: `rails db:rollback`\n- Création migration: `rails generate migration NomDeLaMigration`\n- Routes: `rails routes` ou `rails routes -g mot_clé`\n- Générateur: `rails generate model/controller/scaffold`\n- Tests: `bundle exec rspec` ou `rails test`\n- Seeds: `rails db:seed`\n- Tâches Rake: `rails -T` pour lister",
+      "mcp_servers": {
+        "postgres": {
+          "type": "stdio",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres"],
+          "env": {
+            "DATABASE_URL": "${DATABASE_URL:-postgres://localhost/rails_dev}"
+          }
+        }
+      },
+      "rules": {
+        "rails": "---\npaths:\n  - \"**/*.rb\"\n  - \"**/*.erb\"\n---\n# Conventions Rails\n- Fat models, thin controllers : la logique métier dans les modèles ou services\n- Utiliser les concerns pour le code partagé entre modèles/contrôleurs\n- Éviter les N+1 queries : toujours utiliser includes / preload / eager_load\n- Strong parameters obligatoires dans les contrôleurs\n- Callbacks ActiveRecord avec parcimonie (before_save, after_create)\n- Scopes nommés pour les requêtes réutilisables\n- Validations dans les modèles, jamais dans les contrôleurs\n- Préférer les service objects pour la logique complexe\n- Routes RESTful : resources / resource, éviter les routes custom\n- I18n pour tous les textes affichés"
+      }
+    },
+    "sinatra": {
+      "claude_md_append": "\n## Framework: Sinatra\n- Style classique : `ruby app.rb` (simple, rapide)\n- Style modulaire : hériter de `Sinatra::Base` pour les apps complexes\n- Rechargement : `gem 'sinatra-reloader'` en développement\n- Rack middleware : `use Rack::Session::Cookie` etc.\n- Configuration par environnement : `configure :development do ... end`\n- Templates : ERB, Haml, Slim dans `views/`\n- Fichiers statiques dans `public/`\n- Tests : `rack-test` pour tester les endpoints"
+    },
+    "cli": {
+      "claude_md_append": "\n## Développement CLI Ruby\n- Thor : framework CLI recommandé (`class MyCLI < Thor`)\n- OptionParser : stdlib pour les gems légères\n- TTY toolkit : `tty-prompt`, `tty-table`, `tty-spinner` pour l'UX terminal\n- Structure recommandée : `lib/` + `exe/` (ou `bin/`)\n- Gemspec : déclarer les executables dans `spec.executables`\n- Tests CLI : capturer stdout/stderr avec `StringIO`\n- Exit codes : 0 = succès, 1 = erreur, 2 = usage incorrect"
+    }
+  },
+
+  "claude_md": "# Projet Ruby\n\n## Stack\n- Langage: Ruby 3.2+\n- Gestionnaire de dépendances: Bundler\n\n## Commandes\n- Installation des dépendances: `bundle install`\n- Exécution: `bundle exec ruby script.rb`\n- Tests: `bundle exec rspec`\n- Lint: `rubocop -a` (auto-correction)\n- Vérification syntaxe: `ruby -c fichier.rb`\n- Console: `bundle exec irb` ou `bundle exec pry`\n\n## Conventions\n- Style RuboCop (Standard Ruby ou style communautaire)\n- RSpec pour les tests\n- Documentation YARD sur les méthodes publiques\n- Couverture cible: 80%+\n- `frozen_string_literal: true` en en-tête de chaque fichier",
+
+  "rules": {
+    "ruby-conventions": "---\npaths:\n  - \"**/*.rb\"\n---\n# Conventions Ruby\n- snake_case pour les méthodes et variables, CamelCase pour les classes/modules\n- Blocs avec `do...end` pour le multiligne, `{ }` pour le monoligne\n- `# frozen_string_literal: true` en première ligne de chaque fichier\n- Préférer les keyword arguments pour les méthodes avec 2+ paramètres\n- Utiliser les méthodes Enumerable (map, select, reject, reduce) au lieu des boucles\n- DRY : extraire le code dupliqué dans des méthodes ou modules\n- Modules pour le namespacing et les mixins\n- Blocs `begin/rescue` ciblés (jamais `rescue Exception`)\n- Préférer `&:method_name` pour les blocs simples (`array.map(&:to_s)`)\n- Utiliser `freeze` sur les constantes (tableaux, hashes)",
+    "testing": "---\npaths:\n  - \"spec/**/*.rb\"\n  - \"**/spec_helper.rb\"\n  - \"**/rails_helper.rb\"\n---\n# Conventions de Tests Ruby (RSpec)\n- Structure `describe` / `context` / `it` pour l'organisation\n- `let` et `subject` pour les déclarations lazy\n- `shared_examples` pour le comportement partagé entre specs\n- FactoryBot pour la création d'objets de test (pas de fixtures)\n- `shoulda-matchers` pour les validations et associations Rails\n- Nommage: `it 'devrait faire quelque chose quand condition'`\n- Un `expect` par `it` quand possible\n- `before` / `after` hooks pour le setup/teardown\n- `aggregate_failures` pour grouper les assertions liées\n- Pas de dépendances entre tests (ordre aléatoire avec `--order rand`)"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Lance le lint et les tests Ruby avec couverture\n---\n\n1. Lint : `rubocop --format simple`\n2. Tests : `bundle exec rspec --format documentation`\n3. Couverture : `COVERAGE=true bundle exec rspec` (nécessite simplecov dans le Gemfile)\n4. Vérification syntaxe : `ruby -c` sur les fichiers modifiés",
+    "create-service": "---\nname: create-service\ndescription: Créer un service object Ruby (PORO)\n---\n\nCréer le service `$ARGUMENTS` :\n\n1. Créer `app/services/$ARGUMENTS.rb` (ou `lib/services/$ARGUMENTS.rb` hors Rails) :\n   ```ruby\n   # frozen_string_literal: true\n\n   class $ARGUMENTS\n     def initialize(params)\n       @params = params\n     end\n\n     def call\n       # logique métier ici\n     end\n\n     private\n\n     attr_reader :params\n   end\n   ```\n2. Créer `spec/services/${ARGUMENTS}_spec.rb` avec les tests RSpec\n3. Ajouter les type annotations YARD\n4. Documenter les cas d'erreur et les valeurs de retour"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(ruby *)",
+        "Bash(bundle *)",
+        "Bash(rails *)",
+        "Bash(rake *)",
+        "Bash(rspec *)",
+        "Bash(rubocop *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}

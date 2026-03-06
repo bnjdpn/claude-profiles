@@ -175,22 +175,32 @@ DETECTION_RULES = [
     (["*.xcodeproj", "*.xcworkspace", "Package.swift"], "ios-swift", None),
     # Flutter / Dart — pubspec.yaml est unique à Dart
     (["pubspec.yaml"], "flutter", None),
+    # Kotlin Multiplatform — shared/build.gradle.kts avant Android
+    (["shared/build.gradle.kts", "composeApp/build.gradle.kts"], "kotlin-multiplatform", None),
     # Android — doit avoir app/build.gradle* (sous-dossier app) pour se distinguer de Java
     (["app/build.gradle*", "app/build.gradle.kts"], "android", None),
     # Java — Maven (pom.xml est sans ambiguïté)
     (["pom.xml"], "java", "maven"),
     # Java — Gradle (après Android, donc seulement si pas de app/)
     (["build.gradle", "build.gradle.kts", "gradlew"], "java", "gradle"),
+    # C# / .NET — marqueurs spécifiques
+    (["*.csproj", "*.sln"], "csharp-dotnet", None),
     # Rust
     (["Cargo.toml"], "rust", None),
     # Go
     (["go.mod"], "go", None),
+    # Elixir — mix.exs est unique à Elixir
+    (["mix.exs"], "elixir", None),
     # TypeScript / React — marqueurs spécifiques React (tsx, next.config)
     (["next.config.*", "*.tsx"], "typescript-react", None),
     # TypeScript / Node — tsconfig sans tsx = probablement backend
     (["tsconfig.json"], "typescript-node", None),
     # JavaScript / Node
     (["package.json"], "javascript-node", None),
+    # Ruby — Gemfile est unique à Ruby
+    (["Gemfile", "*.gemspec"], "ruby", None),
+    # PHP — composer.json est unique à PHP
+    (["composer.json", "artisan"], "php", None),
     # Python
     (["pyproject.toml", "setup.py", "requirements.txt", "Pipfile"], "python", None),
     # C / C++
@@ -253,6 +263,54 @@ def detect_variant(profile_name: str, directory: str = ".") -> Optional[str]:
             content = (path / "pyproject.toml").read_text()
             if "fastapi" in content.lower():
                 return "fastapi"
+
+    if profile_name == "ruby":
+        if (path / "config" / "routes.rb").exists() or list(path.glob("bin/rails")):
+            return "rails"
+        if (path / "Gemfile").exists():
+            content = (path / "Gemfile").read_text()
+            if "sinatra" in content.lower():
+                return "sinatra"
+
+    if profile_name == "php":
+        if (path / "artisan").exists():
+            return "laravel"
+        if (path / "composer.json").exists():
+            content = (path / "composer.json").read_text()
+            if "symfony/framework-bundle" in content:
+                return "symfony"
+        if (path / "wp-config.php").exists() or (path / "wp-content").exists():
+            return "wordpress"
+
+    if profile_name == "csharp-dotnet":
+        # Inspecter les .csproj pour détecter le SDK
+        for csproj in path.glob("**/*.csproj"):
+            try:
+                content = csproj.read_text()
+                if "Microsoft.NET.Sdk.Web" in content:
+                    if "Microsoft.AspNetCore.Components" in content:
+                        return "blazor"
+                    return "aspnet"
+                if "Microsoft.Maui" in content:
+                    return "maui"
+            except OSError:
+                pass
+
+    if profile_name == "elixir":
+        if (path / "config" / "config.exs").exists():
+            try:
+                content = (path / "mix.exs").read_text()
+                if "phoenix_live_view" in content:
+                    return "liveview"
+                if "phoenix" in content.lower():
+                    return "phoenix"
+            except OSError:
+                pass
+
+    if profile_name == "kotlin-multiplatform":
+        if (path / "composeApp").exists():
+            return "compose-multiplatform"
+        return "shared-logic"
 
     return None
 

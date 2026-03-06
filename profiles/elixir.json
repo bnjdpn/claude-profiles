@@ -1,0 +1,65 @@
+{
+  "display_name": "Elixir",
+  "description": "Développement Elixir (Phoenix, LiveView, CLI)",
+  "detect_markers": ["mix.exs"],
+
+  "mcp_servers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "_comment": "Documentation temps réel Elixir, Phoenix, Ecto"
+    }
+  },
+
+  "variants": {
+    "phoenix": {
+      "claude_md_append": "\n## Framework: Phoenix\n- Serveur de développement : `mix phx.server`\n- Console interactive : `iex -S mix phx.server`\n- Routes : `mix phx.routes`\n- Migrations : `mix ecto.migrate` / `mix ecto.rollback`\n- Génération : `mix phx.gen.context`, `mix phx.gen.html`, `mix phx.gen.json`\n\n### Conventions Phoenix\n- Contexts : modules frontières qui encapsulent la logique métier\n- Schemas : modules Ecto décrivant les structures de données\n- Changesets : validation et transformation des données entrantes\n- Plugs : composition de middlewares dans le pipeline HTTP\n- LiveView : utiliser si applicable pour les interfaces temps réel"
+    },
+    "liveview": {
+      "claude_md_append": "\n## Framework: Phoenix LiveView\n- `handle_event/3` : gestion des événements côté client\n- `assign/2` et `assign/3` : mise à jour des assigns du socket\n- `push_event/3` : envoi d'événements vers le client JavaScript\n- Streams : `stream/4`, `stream_insert/3`, `stream_delete/2` pour les grandes listes\n- Composants : `live_component/1`, composants fonctionnels avec `attr` et `slot`\n- Hooks JS : `phx-hook` pour l'interopérabilité JavaScript\n- Navigation : `push_navigate/2`, `push_patch/2` pour le routage côté client"
+    },
+    "cli": {
+      "claude_md_append": "\n## Application CLI\n- Escript : `mix escript.build` pour générer un exécutable autonome\n- Mix tasks : `mix help` pour lister, `mix <task>` pour exécuter\n- OptionParser : parsing d'arguments avec `OptionParser.parse/2`\n- Sortie formatée : `IO.puts/1`, `IO.ANSI` pour les couleurs\n- Configuration : `Application.get_env/3` ou fichiers de config Mix"
+    }
+  },
+
+  "claude_md": "# Projet Elixir\n\n## Stack\n- Langage : Elixir 1.16+\n- Runtime : OTP 26+\n- Build : Mix\n\n## Commandes\n- Compilation : `mix compile`\n- Tests : `mix test`\n- Formatage : `mix format`\n- Analyse statique : `mix credo`\n- Typage : `mix dialyzer`\n- Dépendances : `mix deps.get` / `mix deps.compile`\n- Console : `iex -S mix`\n\n## Conventions\n- Pattern matching : privilégier le pattern matching aux conditions imbriquées\n- Opérateur pipe `|>` : chaîner les transformations de données\n- Blocs `with` : pour les séquences d'opérations pouvant échouer\n- GenServer : processus avec état géré par OTP\n- Arbres de supervision : structurer l'application en arbres de Supervisors\n- Modules petits et focalisés avec responsabilité unique\n- Documentation avec `@moduledoc` et `@doc`\n- Spécifications de types avec `@spec`",
+
+  "rules": {
+    "elixir-conventions": "---\npaths:\n  - \"**/*.ex\"\n  - \"**/*.exs\"\n---\n# Conventions Elixir\n- snake_case pour les fonctions, variables et noms de fichiers\n- PascalCase pour les noms de modules\n- `@moduledoc` sur chaque module, `@doc` sur chaque fonction publique\n- `@spec` sur toutes les fonctions publiques\n- Pattern matching plutôt que conditions (if/cond)\n- Opérateur pipe `|>` pour les transformations de données\n- Modules petits et focalisés avec une seule responsabilité\n- Protocols pour le polymorphisme\n- Behaviours pour les contrats entre modules\n- Éviter les fonctions de plus de 20 lignes\n- Préférer les fonctions privées nommées aux lambdas complexes",
+    "testing": "---\npaths:\n  - \"**/*_test.exs\"\n  - \"**/test/**/*.exs\"\n---\n# Conventions de Tests Elixir (ExUnit)\n- Structure : `describe` pour grouper, `test` pour chaque cas\n- Setup : `setup/1` et `setup_all/1` pour l'initialisation\n- Assertions : `assert`, `refute`, `assert_raise`, `assert_receive`\n- Mocks : Mox pour les mocks basés sur les behaviours\n- Doctests : `doctest MonModule` dans les fichiers de test\n- Tests async : `use ExUnit.Case, async: true` quand possible\n- Fixtures : modules de factory ou `setup` blocks\n- Nommage : décrire le comportement attendu, pas l'implémentation"
+  },
+
+  "skills": {
+    "build-and-test": "---\nname: build-and-test\ndescription: Compile, analyse et teste le projet Elixir\n---\n\n1. Compilation stricte : `mix compile --warnings-as-errors`\n2. Analyse statique : `mix credo` (si disponible)\n3. Tests : `mix test`\n4. Formatage : `mix format --check-formatted` (vérification seule)",
+    "create-context": "---\nname: create-context\ndescription: Crée un contexte Phoenix (module contexte + schéma + migration)\n---\n\n1. Générer le contexte : `mix phx.gen.context <Contexte> <Schema> <table> <champ:type ...>`\n2. Vérifier le module contexte généré dans `lib/<app>/<contexte>.ex`\n3. Vérifier le schéma Ecto dans `lib/<app>/<contexte>/<schema>.ex`\n4. Vérifier la migration dans `priv/repo/migrations/`\n5. Exécuter la migration : `mix ecto.migrate`\n6. Lancer les tests : `mix test`"
+  },
+
+  "settings": {
+    "permissions": {
+      "allow": [
+        "Bash(mix *)",
+        "Bash(elixir *)",
+        "Bash(iex *)",
+        "Bash(git *)",
+        "Read",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "deny": [
+        "Bash(sudo *)",
+        "Bash(rm -rf *)"
+      ]
+    }
+  }
+}
