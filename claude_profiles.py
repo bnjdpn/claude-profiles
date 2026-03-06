@@ -17,10 +17,12 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import sys
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -44,12 +46,63 @@ def styled(text: str, *styles: str) -> str:
 
 PROFILES_DIR = Path.home() / ".claude-profiles"
 BUILTIN_PROFILES_DIR = Path(__file__).parent / "profiles"
+OVERLAYS_DIR = Path.home() / ".claude-profiles" / "overlays"
+BUILTIN_OVERLAYS_DIR = Path(__file__).parent / "profiles" / "overlays"
+
+def get_overlays_dir() -> Path:
+    """Retourne le dossier des overlays utilisateur, ou les built-in si pas initialisé."""
+    if OVERLAYS_DIR.exists():
+        return OVERLAYS_DIR
+    return BUILTIN_OVERLAYS_DIR
 
 def get_profiles_dir() -> Path:
     """Retourne le dossier des profils utilisateur, ou les built-in si pas initialisé."""
     if PROFILES_DIR.exists():
         return PROFILES_DIR
     return BUILTIN_PROFILES_DIR
+
+# ─── Applied-profile (métadonnées d'application) ─────────────────────────────
+
+APPLIED_PROFILE_PATH = ".claude/.applied-profile"
+
+def sha256_file(filepath: Path) -> str:
+    """Calcule le checksum SHA256 d'un fichier."""
+    h = hashlib.sha256()
+    h.update(filepath.read_bytes())
+    return h.hexdigest()
+
+
+def read_applied_profile(directory: str = ".") -> Optional[dict]:
+    """Lit le fichier .applied-profile s'il existe."""
+    ap_path = Path(directory).resolve() / APPLIED_PROFILE_PATH
+    if ap_path.exists():
+        try:
+            return json.loads(ap_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            return None
+    return None
+
+
+def write_applied_profile(directory: str, profile_name: str, variant: Optional[str],
+                          overlays: list[str], generated_files: list[Path]):
+    """Écrit le fichier .applied-profile avec les métadonnées et checksums."""
+    path = Path(directory).resolve()
+    checksums = {}
+    for fp in generated_files:
+        if fp.exists():
+            rel = str(fp.relative_to(path))
+            checksums[rel] = sha256_file(fp)
+
+    data = {
+        "profile": profile_name,
+        "variant": variant,
+        "overlays": overlays,
+        "applied_at": datetime.now(timezone.utc).isoformat(),
+        "checksums": checksums,
+    }
+    ap_path = path / APPLIED_PROFILE_PATH
+    ap_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+
 
 # ─── Chargement YAML simplifié (sans dépendance) ─────────────────────────────
 
@@ -74,6 +127,42 @@ def list_profiles() -> list[str]:
         p.stem for p in profiles_dir.glob("*.json")
         if not p.name.startswith("_")
     ])
+
+
+def deep_merge(base: dict, override: dict) -> dict:
+    """Fusionne récursivement deux dicts. override gagne en cas de conflit."""
+    result = base.copy()
+    for key, val in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(val, dict):
+            result[key] = deep_merge(result[key], val)
+        else:
+            result[key] = val
+    return result
+
+
+def load_overlay(name: str) -> dict:
+    """Charge un overlay depuis le dossier d'overlays."""
+    for overlays_dir in [OVERLAYS_DIR, BUILTIN_OVERLAYS_DIR]:
+        overlay_path = overlays_dir / f"{name}.json"
+        if overlay_path.exists():
+            with open(overlay_path) as f:
+                return json.load(f)
+    print(styled(f"Overlay '{name}' introuvable.", Colors.RED))
+    print(f"Overlays disponibles : {', '.join(list_overlays())}")
+    sys.exit(1)
+
+
+def list_overlays() -> list[str]:
+    """Liste tous les overlays disponibles."""
+    seen = set()
+    overlays = []
+    for overlays_dir in [OVERLAYS_DIR, BUILTIN_OVERLAYS_DIR]:
+        if overlays_dir.exists():
+            for p in overlays_dir.glob("*.json"):
+                if not p.name.startswith("_") and p.stem not in seen:
+                    seen.add(p.stem)
+                    overlays.append(p.stem)
+    return sorted(overlays)
 
 # ─── Détection automatique du projet ─────────────────────────────────────────
 
@@ -168,14 +257,19 @@ def detect_variant(profile_name: str, directory: str = ".") -> Optional[str]:
 
 # ─── Application d'un profil ─────────────────────────────────────────────────
 
-def apply_profile(profile_name: str, variant: Optional[str] = None, directory: str = ".", dry_run: bool = False):
+def apply_profile(profile_name: str, variant: Optional[str] = None, directory: str = ".",
+                   dry_run: bool = False, overlays: Optional[list[str]] = None):
     """Applique un profil au répertoire courant."""
     profile = load_profile(profile_name)
     path = Path(directory).resolve()
+    generated_files: list[Path] = []
 
     # Résoudre la variante
     if variant is None:
         variant = detect_variant(profile_name, directory)
+
+    if overlays is None:
+        overlays = []
 
     variant_config = {}
     if variant and "variants" in profile:
@@ -216,6 +310,7 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
         mcp_path = path / ".mcp.json"
         if not dry_run:
             mcp_path.write_text(json.dumps(mcp_json, indent=2) + "\n")
+            generated_files.append(mcp_path)
         print(styled(f"  + .mcp.json", Colors.GREEN) + f" ({len(mcp_servers)} serveurs MCP)")
         for name in mcp_servers:
             print(styled(f"      - {name}", Colors.DIM))
@@ -233,6 +328,7 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
                 shutil.copy2(claude_md_path, claude_md_path.with_suffix(".md.bak"))
         if not dry_run:
             claude_md_path.write_text(claude_md + "\n")
+            generated_files.append(claude_md_path)
         print(styled(f"  + .claude/CLAUDE.md", Colors.GREEN))
 
     # 4. Générer les rules
@@ -244,6 +340,7 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
         rule_path = path / ".claude" / "rules" / f"{rule_name}.md"
         if not dry_run:
             rule_path.write_text(rule_content + "\n")
+            generated_files.append(rule_path)
         print(styled(f"  + .claude/rules/{rule_name}.md", Colors.GREEN))
 
     # 5. Générer les skills
@@ -255,7 +352,9 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
         skill_dir = path / ".claude" / "skills" / skill_name
         if not dry_run:
             skill_dir.mkdir(parents=True, exist_ok=True)
-            (skill_dir / "SKILL.md").write_text(skill_content + "\n")
+            skill_path = skill_dir / "SKILL.md"
+            skill_path.write_text(skill_content + "\n")
+            generated_files.append(skill_path)
         print(styled(f"  + .claude/skills/{skill_name}/SKILL.md", Colors.GREEN))
 
     # 6. Générer settings.json
@@ -272,12 +371,19 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
         settings_path = path / ".claude" / "settings.json"
         if not dry_run:
             settings_path.write_text(json.dumps(settings, indent=2) + "\n")
+            generated_files.append(settings_path)
         print(styled(f"  + .claude/settings.json", Colors.GREEN))
 
-    # 7. Mettre à jour .gitignore
+    # 7. Écrire .applied-profile
+    if not dry_run and generated_files:
+        write_applied_profile(directory, profile_name, variant, overlays, generated_files)
+        print(styled(f"  + .claude/.applied-profile", Colors.GREEN) + f" ({len(generated_files)} checksums)")
+
+    # 8. Mettre à jour .gitignore
     gitignore_entries = [
         ".claude/settings.local.json",
         ".claude/CLAUDE.local.md",
+        ".claude/.applied-profile",
     ]
     gitignore_path = path / ".gitignore"
     existing_gitignore = ""
@@ -443,16 +549,44 @@ def cmd_diff(args):
     directory = args.directory
     path = Path(directory).resolve()
 
+    # Lire le profil appliqué s'il existe
+    applied = read_applied_profile(directory)
+
     if profile_name == "auto":
-        detected = detect_project(directory)
-        if not detected:
-            print(styled("Impossible de détecter le type de projet.", Colors.RED))
-            sys.exit(1)
-        profile_name = detected[0][0]
+        if applied:
+            profile_name = applied["profile"]
+            print(styled(f"  Profil appliqué détecté : {profile_name}", Colors.CYAN))
+            if applied.get("variant"):
+                print(styled(f"  Variante : {applied['variant']}", Colors.CYAN))
+            if applied.get("overlays"):
+                print(styled(f"  Overlays : {', '.join(applied['overlays'])}", Colors.CYAN))
+        else:
+            detected = detect_project(directory)
+            if not detected:
+                print(styled("Impossible de détecter le type de projet.", Colors.RED))
+                sys.exit(1)
+            profile_name = detected[0][0]
 
     profile = load_profile(profile_name)
 
     print(styled(f"\nComparaison avec le profil '{profile_name}' :\n", Colors.BOLD))
+
+    # Vérifier les checksums si .applied-profile existe
+    if applied and applied.get("checksums"):
+        modified = []
+        for rel_path, expected_hash in applied["checksums"].items():
+            fp = path / rel_path
+            if not fp.exists():
+                modified.append((rel_path, "supprimé"))
+            elif sha256_file(fp) != expected_hash:
+                modified.append((rel_path, "modifié"))
+        if modified:
+            print(styled("  Fichiers modifiés depuis l'apply :", Colors.YELLOW))
+            for rel, status in modified:
+                print(f"    ~ {rel} ({status})")
+        else:
+            print(styled("  Checksums : OK (aucune modification locale)", Colors.GREEN))
+        print()
 
     # Vérifier .mcp.json
     mcp_path = path / ".mcp.json"
