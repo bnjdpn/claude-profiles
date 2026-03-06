@@ -461,6 +461,130 @@ def apply_profile(profile_name: str, variant: Optional[str] = None, directory: s
     print(styled(f"\n  Profil '{display_name}' appliqué avec succès !", Colors.BOLD, Colors.GREEN))
     print(styled(f"  Tu peux personnaliser avec .claude/CLAUDE.local.md et .claude/settings.local.json\n", Colors.DIM))
 
+
+def sync_profile(directory: str = ".", dry_run: bool = False, force: bool = False):
+    """Synchronise le projet avec la dernière version du profil source."""
+    path = Path(directory).resolve()
+
+    # 1. Lire .applied-profile
+    applied = read_applied_profile(directory)
+    if not applied:
+        print(styled("Aucun profil appliqué dans ce répertoire.", Colors.RED))
+        print("Utilise 'claude-profiles apply <profil>' d'abord.")
+        sys.exit(1)
+
+    profile_name = applied["profile"]
+    variant = applied.get("variant")
+    overlays = applied.get("overlays", [])
+    old_checksums = applied.get("checksums", {})
+
+    # 2. Résoudre le profil depuis la source
+    resolved = resolve_profile(profile_name, variant, directory, overlays)
+    file_map = generate_file_map(resolved)
+
+    display_name = resolved["display_name"]
+    if variant:
+        display_name += f" ({variant})"
+    if overlays:
+        display_name += " " + " ".join(f"+{o}" for o in overlays)
+
+    print(styled(f"\n{'=' * 60}", Colors.BLUE))
+    print(styled(f"  Sync : {display_name}", Colors.BOLD, Colors.CYAN))
+    print(styled(f"  Cible : {path}", Colors.DIM))
+    print(styled(f"{'=' * 60}\n", Colors.BLUE))
+
+    if dry_run:
+        print(styled("  [MODE DRY-RUN] Aucun fichier ne sera modifié\n", Colors.YELLOW))
+
+    updated = []
+    added = []
+    skipped = []
+    deleted = []
+    new_checksums = {}
+
+    # 3. Traiter les fichiers du nouveau profil
+    for rel_path, content in file_map.items():
+        fp = path / rel_path
+        new_hash = hashlib.sha256(content.encode()).hexdigest()
+
+        if fp.exists():
+            current_hash = sha256_file(fp)
+            old_hash = old_checksums.get(rel_path)
+
+            if old_hash and current_hash != old_hash and not force:
+                # Fichier modifié localement → skip
+                skipped.append(rel_path)
+                new_checksums[rel_path] = old_hash  # garder l'ancien checksum
+            else:
+                # Fichier non modifié ou --force → écraser
+                if current_hash != new_hash:
+                    if not dry_run:
+                        fp.parent.mkdir(parents=True, exist_ok=True)
+                        fp.write_text(content)
+                    updated.append(rel_path)
+                new_checksums[rel_path] = new_hash
+        else:
+            # Nouveau fichier → écrire
+            if not dry_run:
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text(content)
+            added.append(rel_path)
+            new_checksums[rel_path] = new_hash
+
+    # 4. Détecter les fichiers orphelins (dans old mais pas dans new)
+    for rel_path, old_hash in old_checksums.items():
+        if rel_path not in file_map:
+            fp = path / rel_path
+            if fp.exists():
+                current_hash = sha256_file(fp)
+                if current_hash == old_hash:
+                    # Non modifié → supprimer
+                    if not dry_run:
+                        fp.unlink()
+                    deleted.append(rel_path)
+                else:
+                    # Modifié localement → garder + warn
+                    skipped.append(rel_path)
+                    new_checksums[rel_path] = old_hash
+
+    # 5. Écrire le nouveau .applied-profile
+    if not dry_run:
+        data = {
+            "profile": profile_name,
+            "variant": variant,
+            "overlays": overlays,
+            "applied_at": datetime.now(timezone.utc).isoformat(),
+            "checksums": new_checksums,
+        }
+        ap_path = path / APPLIED_PROFILE_PATH
+        ap_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+
+    # 6. Résumé
+    print(styled("  Résumé :\n", Colors.BOLD))
+    if updated:
+        print(styled(f"  Mis à jour ({len(updated)}) :", Colors.GREEN))
+        for f in updated:
+            print(f"    ↻ {f}")
+    if added:
+        print(styled(f"  Ajoutés ({len(added)}) :", Colors.GREEN))
+        for f in added:
+            print(f"    + {f}")
+    if deleted:
+        print(styled(f"  Supprimés ({len(deleted)}) :", Colors.YELLOW))
+        for f in deleted:
+            print(f"    - {f}")
+    if skipped:
+        print(styled(f"  Ignorés — modifiés localement ({len(skipped)}) :", Colors.YELLOW))
+        for f in skipped:
+            print(f"    ~ {f}")
+    if not updated and not added and not deleted:
+        print(styled("  Rien à synchroniser, tout est à jour.", Colors.GREEN))
+
+    total = len(updated) + len(added) + len(deleted)
+    print(styled(f"\n  Sync terminé : {total} fichier(s) modifié(s), {len(skipped)} ignoré(s).\n",
+                 Colors.BOLD, Colors.GREEN))
+
+
 # ─── Commandes CLI ────────────────────────────────────────────────────────────
 
 def cmd_detect(args):
@@ -797,6 +921,11 @@ def cmd_diff(args):
     print()
 
 
+def cmd_sync(args):
+    """Commande: synchroniser le projet avec la dernière version du profil source."""
+    sync_profile(directory=args.directory, dry_run=args.dry_run, force=args.force)
+
+
 # ─── Parser CLI ───────────────────────────────────────────────────────────────
 
 def main():
@@ -855,6 +984,13 @@ Exemples:
     p_diff.add_argument("profile", help="Nom du profil (ou 'auto')")
     p_diff.add_argument("--directory", "-d", default=".", help="Répertoire du projet")
     p_diff.set_defaults(func=cmd_diff)
+
+    # sync
+    p_sync = subparsers.add_parser("sync", help="Synchroniser avec la dernière version du profil source")
+    p_sync.add_argument("--directory", "-d", default=".", help="Répertoire du projet")
+    p_sync.add_argument("--dry-run", action="store_true", help="Prévisualiser sans modifier")
+    p_sync.add_argument("--force", action="store_true", help="Écraser même les fichiers modifiés localement")
+    p_sync.set_defaults(func=cmd_sync)
 
     args = parser.parse_args()
 
