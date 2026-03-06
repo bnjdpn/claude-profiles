@@ -15,9 +15,13 @@ python3 claude_profiles.py apply auto --dry-run
 python3 claude_profiles.py apply ios-swift +healthkit --dry-run
 python3 claude_profiles.py list
 python3 claude_profiles.py show +healthkit
+python3 claude_profiles.py diff auto
+python3 claude_profiles.py init
 
 # After installation (via setup.sh)
 claude-profiles apply <profile> [--variant <variant>] [+overlay ...] [--dry-run]
+claude-profiles diff auto                         # Compare config actuelle vs profil
+claude-profiles init                              # Initialise ~/.claude-profiles/
 claude-profiles sync                          # Re-applique le profil source
 claude-profiles sync --force                  # Écrase les modifications locales
 claude-profiles sync --dry-run                # Prévisualise la synchronisation
@@ -27,7 +31,7 @@ There are no tests or linting configured for this project itself. The codebase i
 
 ## Architecture
 
-**Single-file CLI** (`claude_profiles.py`, ~750 lines): everything lives in one file using only stdlib (`argparse`, `json`, `pathlib`, `shutil`).
+**Single-file CLI** (`claude_profiles.py`, ~1025 lines): everything lives in one file using only stdlib (`argparse`, `json`, `pathlib`, `shutil`).
 
 **Profile format** (`profiles/*.json`): each JSON file defines a complete Claude Code configuration:
 - `mcp_servers` → generates `.mcp.json`
