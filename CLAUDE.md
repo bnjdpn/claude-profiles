@@ -18,6 +18,9 @@ python3 claude_profiles.py show +healthkit
 
 # After installation (via setup.sh)
 claude-profiles apply <profile> [--variant <variant>] [+overlay ...] [--dry-run]
+claude-profiles sync                          # Re-applique le profil source
+claude-profiles sync --force                  # Écrase les modifications locales
+claude-profiles sync --dry-run                # Prévisualise la synchronisation
 ```
 
 There are no tests or linting configured for this project itself. The codebase is a single Python script with zero external dependencies.

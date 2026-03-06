@@ -14,6 +14,7 @@ Usage:
     claude-profiles init                # Initialise les profils par défaut dans ~/.claude-profiles/
     claude-profiles create <name>       # Crée un nouveau profil personnalisé
     claude-profiles diff                # Compare la config actuelle vs un profil
+    claude-profiles sync               # Synchronise avec le profil source
 """
 
 import argparse
@@ -946,6 +947,9 @@ Exemples:
   claude-profiles show python                # Détail du profil Python
   claude-profiles init                       # Initialise ~/.claude-profiles/
   claude-profiles diff auto                  # Compare config actuelle vs profil
+  claude-profiles sync                         # Met à jour depuis le profil source
+  claude-profiles sync --force                 # Écrase même les modifications locales
+  claude-profiles sync --dry-run               # Prévisualise la synchronisation
         """
     )
     subparsers = parser.add_subparsers(dest="command", help="Commande à exécuter")
